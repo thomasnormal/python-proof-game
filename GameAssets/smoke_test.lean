@@ -19,17 +19,18 @@ load_program ag_clamp01 from "GameAssets/envelopes/ag_clamp01.json"
 #py_check midpoint(3, -4) = -1
 #py_check arith.mod(7, 0) raises .zeroDivisionError
 
--- W1L1: concrete loop run — the machine computes, `rfl` checks
-example : tri(4) ==> 10 := by exact ⟨100, rfl⟩
+-- W1L1: concrete loop run — `py_check` makes the kernel run the program
+example : tri(4) ==> 10 := by py_check
 -- NOTE: `by decide` does NOT work here — `Res`/`Val` carry no `DecidableEq`
--- instance (the repo's #py_check uses `#guard` with `BEq` instead). `rfl`
--- (kernel evaluation) is the honest concrete-run proof.
+-- instance (the repo's #py_check uses `#guard` with `BEq` instead).
+-- `py_check` (fuel witness + kernel evaluation, Surface.lean) is the honest
+-- concrete-run proof; it replaced the hand-rolled `refine ⟨100, ?_⟩; rfl`.
 
 -- W1L2: concrete floor-division surprise
-example : midpoint(3, -4) ==> -1 := by exact ⟨100, rfl⟩
+example : midpoint(3, -4) ==> -1 := by py_check
 
--- W1L3: concrete raise
-example : arith.mod(7, 0) ==>! .zeroDivisionError := by exact ⟨100, rfl⟩
+-- W1L3: concrete raise — py_check closes `==>!` goals too
+example : arith.mod(7, 0) ==>! .zeroDivisionError := by py_check
 
 -- W1L4 (bridge): first symbolic statement
 example (a : PyInt) : arith.floordiv(a, 0) ==>! .zeroDivisionError := by

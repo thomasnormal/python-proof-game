@@ -22,7 +22,7 @@ Quick, what is `midpoint(3, -4)` in Python?
 guessed `0`, you were thinking like C. The interpreter under this game thinks
 like CPython, because it is tested *against* CPython.
 
-Prove the run. Same two moves as before: fuel, then compute.
+Prove the run. Same move as before: make the machine run it.
 "
 
 /-- `midpoint(3, -4) ==> -1` — floor division rounds toward minus
@@ -32,10 +32,8 @@ TheoremDoc midpoint_three_negfour as "midpoint_three_negfour" in "Python runs"
 /-- Running `midpoint` on `3` and `-4` terminates and returns `-1` — floor
 division rounds toward minus infinity. -/
 Statement midpoint_three_negfour : midpoint(3, -4) ==> -1 := by
-  Hint "Fuel first: `refine ⟨100, ?_⟩`."
-  refine ⟨100, ?_⟩
-  Hint "Now it's a closed computation again — `rfl` runs it."
-  rfl
+  Hint "A closed run again — `py_check` executes it."
+  py_check
 
 Conclusion "
 The machine agreed: `-1`. Remember this level — in Straight-Line World the

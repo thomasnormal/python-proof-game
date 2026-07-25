@@ -27,7 +27,9 @@ get to be the automation.
 
 The house pattern for multi-`if` bodies:
 
-1. **Fuel**: `refine ⟨32, ?_⟩` — commit a budget, like in Machine World.
+1. **Fuel**: `refine ⟨32, ?_⟩` — commit a step budget by hand. (`py_check`
+   and `py_prove` have been donating the fuel for you all game; the `⟨_, ?_⟩`
+   is you doing it yourself.)
 2. **Decide the branches up front**: `by_cases h1 : x < 0`, then
    `by_cases h2 : 1 < x` — four cases, each with the tests answered.
 3. **Execute**: `py_simp [callFunction, ag_clamp01, h1, h2]` — symbolic
@@ -69,5 +71,5 @@ ideas no tactic can invent for you — the *invariant* and the *decreasing
 measure*. See you there.
 "
 
-NewTactic py_simp by_cases grind omega
+NewTactic refine py_simp by_cases grind omega
 NewDefinition ag_clamp01 LeanModels.Python.callFunction

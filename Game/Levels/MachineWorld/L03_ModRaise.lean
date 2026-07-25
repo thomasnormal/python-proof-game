@@ -26,7 +26,7 @@ specified behavior, and you can prove them.
 `arith`.)
 
 The proof is the same honest shape as before: some fuel makes the run finish
-— just not with a value this time.
+— just not with a value this time. `py_check` handles both endings.
 "
 
 /-- `arith.mod(7, 0) ==>! .zeroDivisionError` — a crash, proved on
@@ -36,14 +36,13 @@ TheoremDoc mod_seven_zero as "mod_seven_zero" in "Python runs"
 /-- Running `mod` from the `arith` module on `7` and `0` terminates by
 raising `ZeroDivisionError`. -/
 Statement mod_seven_zero : arith.mod(7, 0) ==>! .zeroDivisionError := by
-  Hint "`==>!` is also an existential over fuel: `refine ⟨100, ?_⟩`."
-  refine ⟨100, ?_⟩
-  Hint "The run ends in `.exn .zeroDivisionError` — a computation like any
-  other. `rfl`."
-  rfl
+  Hint "`==>!` is also a concrete run — it just ends in
+  `.exn .zeroDivisionError` instead of a value. `py_check` proves crashes
+  too."
+  py_check
 
 Conclusion "
-You proved a crash. On purpose. With `rfl`.
+You proved a crash. On purpose. With `py_check`.
 
 Notice what this rules out: `mod(7, 0)` does not loop forever, does not
 return some junk value, does not hit an unsupported construct — it raises

@@ -18,7 +18,7 @@ against CPython, typed spec surface: `f(a) ==> v`, `py_prove`, `py_loop`, …).
 | Component | Version | Note |
 |---|---|---|
 | Game toolchain | `leanprover/lean4:v4.33.0-rc1` | matches lean-surfaces exactly |
-| lean-surfaces (`lean-models`) | git `fe7418af35badc5d0c28493fd56766c0b46c0551` | == public `master` == local `/home/thomas-ahle/lean_models` master |
+| lean-surfaces (`lean-models`) | git `60ae7c8df622d50fc3a5a10cba082d3e64d5bd0c` | == public `master` == local `/home/thomas-ahle/lean_models` master; first rev with the `py_check` tactic |
 | lean4game GameServer | git tag `v4.31.0` (newest release) | **compiles cleanly under v4.33.0-rc1** |
 | batteries | tag `v4.33.0-rc1` (root-level pin) | shadows GameServer's transitive `v4.31.0` require, which would not build on this toolchain |
 | i18n (hhu-adam) | `v4.31.0` (via GameServer) | compiles cleanly under v4.33.0-rc1 |
@@ -45,9 +45,11 @@ Key facts discovered on the way:
    directory** (the game root under `lake build`); envelopes are bundled in
    `GameAssets/envelopes/` and load fine. Always build from the repo root.
 6. `decide` cannot close concrete-run goals (`Res`/`Val` have `BEq` but no
-   `DecidableEq`); the honest concrete proof is `refine ⟨fuel, ?_⟩; rfl`
-   (kernel-executes the interpreter — the pattern of the framework's own
-   `Tests.lean`).
+   `DecidableEq`); the honest concrete proof is a fuel witness + `rfl`
+   (kernel-executes the interpreter). Since lean-surfaces `60ae7c8d` the
+   framework packages exactly that as the `py_check` tactic — the tactic twin
+   of `#py_check` — which World 1 now uses instead of a hand-rolled
+   `refine ⟨fuel, ?_⟩; rfl`.
 
 Fallback ladder if this pinning ever breaks (not needed today):
 game on v4.31.0 + a vendored lean-surfaces trimmed to the Python lane
@@ -63,9 +65,9 @@ Concrete runs; the machine computes inside the proof.
 
 | # | Level | Statement | Proof | Introduces |
 |---|---|---|---|---|
-| 1 | Run it | `tri(4) ==> 10` | `refine ⟨100, ?_⟩; rfl` | `==>`, fuel, `refine`, `rfl`, program `tri` |
+| 1 | Run it | `tri(4) ==> 10` | `py_check` | `==>`, fuel, `py_check` (make Lean actually run the program), program `tri` |
 | 2 | The floor is not the ceiling | `midpoint(3, -4) ==> -1` | same shape | floor division, concretely |
-| 3 | It crashes. Prove it. | `arith.mod(7, 0) ==>! .zeroDivisionError` | same shape | `==>!`, exceptions as specified behavior |
+| 3 | It crashes. Prove it. | `arith.mod(7, 0) ==>! .zeroDivisionError` | same shape | `==>!`, exceptions as specified behavior; `py_check` closes both concrete shapes |
 | 4 | The bridge | `floordiv_zero (a : PyInt) : arith.floordiv(a, 0) ==>! .zeroDivisionError` | `py_prove [arith]`, **given as a visible `Template`** | first symbolic statement, `py_prove` |
 
 ### World 2 — Straight-Line World (built)
@@ -78,7 +80,7 @@ Symbolic inputs, loop-free bodies.
 | 2 | Say floor when you mean floor | `midpoint_spec : midpoint(a, b) ==> Int.fdiv (a + b) 2` | `py_prove [midpoint]` | the honest `Int.fdiv` statement discipline; named statement enters inventory |
 | 3 | Preconditions are hypotheses | `midpoint_nonneg (ha : 0 ≤ a) (hb : 0 ≤ b) : midpoint(a, b) ==> (a + b) / 2` | `py_corollary [midpoint_spec, Int.fdiv_eq_ediv_of_nonneg]` | preconditions-as-hypotheses, `py_corollary`, value bridging without re-execution |
 | 4 | Fork in the road | `my_abs_spec : my_abs(x) ==> \|x\|` | `py_prove [my_abs]` | branching bodies; `py_prove`'s single-`split` recipe |
-| 5 | **Boss: clamp01** | `clamp01_total : ag_clamp01.clamp01(x) ==> max 0 (min 1 x)` | `refine ⟨32, ?_⟩; by_cases h1 : x < 0 <;> by_cases h2 : 1 < x <;> py_simp [callFunction, ag_clamp01, h1, h2] <;> grind` | the documented boundary of `py_prove` (two sequential `if`s); `py_simp`, `by_cases`, `grind`, `omega` (and why `omega` fails on `PyInt`-branded comparisons) |
+| 5 | **Boss: clamp01** | `clamp01_total : ag_clamp01.clamp01(x) ==> max 0 (min 1 x)` | `refine ⟨32, ?_⟩; by_cases h1 : x < 0 <;> by_cases h2 : 1 < x <;> py_simp [callFunction, ag_clamp01, h1, h2] <;> grind` | the documented boundary of `py_prove` (two sequential `if`s); `refine` (hand the fuel yourself — the move `py_check`/`py_prove` make internally), `py_simp`, `by_cases`, `grind`, `omega` (and why `omega` fails on `PyInt`-branded comparisons) |
 
 (Verified during design: `py_prove [ag_clamp01]` genuinely fails on the boss —
 the level teaches a real boundary, not a staged one.)
@@ -95,7 +97,7 @@ Planned levels, with the Template/Hole invariant pedagogy — lean4game's
 invariant (or only the measure) as a hole, so each level isolates exactly one
 new cognitive load:
 
-1. **Loop, concretely** — `tri(6) ==> 21` by `refine ⟨100, ?_⟩; rfl`:
+1. **Loop, concretely** — `tri(6) ==> 21` by `py_check`:
    loops cost nothing when inputs are concrete; sets up the contrast.
 2. **Read an invariant** — `tri_total (hn : 0 ≤ n) : tri(n) ==> n * (n + 1) / 2`,
    full proof given as visible Template (as W1L4 did for `py_prove`):
@@ -150,7 +152,7 @@ Things worth knowing when extending the game:
 1. **Atom-based tactic policing.** GameServer scans every alphabetic atom in
    the player's proof; anything not whitelisted or registered errors at
    difficulty 2. All tactics players type must be `NewTactic`-registered
-   (incl. `refine`, `rfl`); theorems used as idents (`midpoint_spec`,
+   (incl. `refine`); theorems used as idents (`midpoint_spec`,
    `Int.fdiv_eq_ediv_of_nonneg`) must be `NewTheorem`-registered. *Program
    constants* (`tri`, `arith`, …) and defs (`callFunction`) resolve as
    non-theorems and pass the runtime check, but `MakeGame` still wants them
@@ -167,13 +169,18 @@ Things worth knowing when extending the game:
    (`tri(4) ==> 10`) in the game with zero configuration — Delab.lean's
    delaborators ride along with the import, and GameServer replays the level
    file's `open` scope for the player's session.
-6. **Hints & goal size**: after `refine ⟨100, ?_⟩` the goal shows the folded
+6. **Hints & goal size**: after committing fuel (`refine ⟨32, ?_⟩`) the goal shows the folded
    constant (`callFunction tri "tri" …`) — compact and honest. But any tactic
    that unfolds the program constant (e.g. a failing `py_simp`) dumps the
    full AST literal into the goal view. Level texts warn players to lean on
    the provided recipes.
 7. **No `DecidableEq` on `Res`/`Val`** — `decide` is not an option for
-   concrete runs; use `refine ⟨fuel, ?_⟩; rfl`.
+   concrete runs. *Discovery resolved upstream:* the game build's workaround
+   (`refine ⟨fuel, ?_⟩; rfl` by hand) fed back into the framework, which
+   gained the `py_check` tactic (lean-surfaces `60ae7c8d`, Surface.lean) —
+   fuel witness + kernel `rfl` for both `==>` and `==>!` concrete goals; the
+   game now teaches that instead. A `DecidableEq` affordance on `Res`/`Val`
+   (so `decide` also works) remains queued upstream.
 
 ## Publication checklist (per lean4game docs)
 
@@ -187,7 +194,7 @@ Everything below is deliberately **not done** (local-only mandate):
       under `images/` is the one nice-to-have still missing).
 - [x] Dependency form: the lakefile already uses the **git** dependency on
       `https://github.com/thomasnormal/lean-surfaces` pinned to rev
-      `fe7418af…` (no path deps anywhere), so the repo is publication-ready
+      `60ae7c8d…` (no path deps anywhere), so the repo is publication-ready
       as-is. If you iterate against a local checkout meanwhile, switch the
       `require` to `from "/path/to/lean_models"` and back before pushing.
 - [ ] Ensure the GitHub Actions workflow from GameSkeleton

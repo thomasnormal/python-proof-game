@@ -13,24 +13,29 @@ as the `Statement` (GameServer quirk), so `midpoint_spec`'s doc lives in its
 level file, not here.
 -/
 
+/-- `py_check` closes a concrete-run goal — `f(args) ==> v` or
+`f(args) ==>! e` with every argument a literal — by making Lean **actually
+run the program** inside the proof.
+
+Under the hood it donates a generous fuel budget (4096 steps — extra fuel is
+harmless, a finished run keeps its result) and asks the kernel to compute the
+run down to `.ok v` (resp. `.exn e`). No test framework, no mocking: the
+Python program executes inside the proof checker.
+
+It refuses symbolic goals on principle — a free variable means there is
+nothing concrete to run. That is `py_prove`'s territory. -/
+TacticDoc py_check
+
 /-- `refine e` fills in the goal with the expression `e`, leaving every `?_`
 inside `e` as a new goal.
 
-In this game its main job is handing the interpreter its fuel:
-`refine ⟨100, ?_⟩` turns the claim “*some* amount of fuel makes this Python
-call return that value” into the concrete claim “fuel `100` does”. Extra fuel
-is always harmless — a finished run keeps its result. -/
+In this game its job is handing the interpreter its fuel *by hand*:
+`refine ⟨32, ?_⟩` turns the claim “*some* amount of fuel makes this Python
+call finish” into the concrete claim “fuel `32` does” — exactly what
+`py_check` and `py_prove` do for you internally. At the boss you take the
+wheel yourself. Extra fuel is always harmless — a finished run keeps its
+result. -/
 TacticDoc refine
-
-/-- `rfl` proves a goal of the form `a = b` when both sides compute to the
-same value.
-
-Here that computation is a *Python run*: the goal after `refine ⟨100, ?_⟩` is
-an equation about `callFunction …`, which is an executable Lean definition —
-the verified interpreter. `rfl` makes Lean's kernel actually run the program
-and check the output. No test framework, no mocking: the run happens inside
-the proof. -/
-TacticDoc rfl
 
 /-- `py_prove [prog]` closes total-correctness goals (`f(a, b) ==> v`,
 `f(a) ==>! e`) for straight-line *and single-branching* loop-free bodies.
