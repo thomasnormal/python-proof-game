@@ -1,0 +1,65 @@
+# The Python Proof Game
+
+A [lean4game](https://github.com/leanprover-community/lean4game/) that teaches
+formal verification of **real Python programs**, built on the
+[lean-surfaces](https://github.com/thomasnormal/lean-surfaces) framework:
+actual Python files, parsed by CPython's own parser, deep-embedded in Lean 4
+and executed by a verified interpreter that is differentially tested against
+CPython.
+
+You'll prove theorems like
+
+```lean
+theorem tri_four : tri(4) ==> 10                     -- run a loop inside a proof
+theorem mod_seven_zero : arith.mod(7, 0) ==>! .zeroDivisionError  -- prove a crash
+theorem add_total (a b : PyInt) : add(a, b) ==> a + b   -- ... for EVERY input
+theorem midpoint_spec (a b : PyInt) : midpoint(a, b) ==> Int.fdiv (a + b) 2
+```
+
+in the playful style of the Natural Number Game.
+
+## Contents
+
+- **World 1 — Machine World** (4 levels): concrete runs; the kernel executes
+  Python inside your proofs. Ends at the symbolic bridge.
+- **World 2 — Straight-Line World** (5 levels): symbolic inputs, `py_prove`,
+  honest floor division, preconditions as hypotheses, and a boss fight at the
+  documented boundary of the automation.
+- **Worlds 3–4** (Loop World, RSA World): designed in
+  [GAME_PLAN.md](GAME_PLAN.md), not yet built.
+
+`GAME_PLAN.md` also records the toolchain reconciliation (this game runs the
+lean4game `v4.31.0` GameServer on Lean `v4.33.0-rc1`) and the publication
+checklist.
+
+## Build
+
+```sh
+lake update   # usually unnecessary — the manifest is committed
+lake build    # builds levels, runs MakeGame checks, writes .lake/gamedata/
+```
+
+Always build from the repo root: the Python programs are ingested at build
+time from `GameAssets/envelopes/*.json`, resolved relative to the working
+directory. A fast re-check of all level proofs outside the game machinery:
+`lake env lean GameAssets/smoke_test.lean`.
+
+To play locally in a browser, use the lean4game development setup
+([running a game locally](https://github.com/leanprover-community/lean4game/blob/main/doc/running_locally.md)):
+devcontainer, Codespaces, or a local `lean4game` clone with `npm start`, then
+open `http://localhost:3000/#/g/local/python-proof-game`.
+
+## Layout
+
+| Path | What |
+|---|---|
+| `Game.lean` | Game metadata + `MakeGame` |
+| `Game/Programs.lean` | All `load_program` ingestions + `#py_check` non-vacuity runs |
+| `Game/Doc.lean` | Inventory docs: tactics, judgments, programs |
+| `Game/Levels/MachineWorld/` | World 1 levels |
+| `Game/Levels/StraightLineWorld/` | World 2 levels |
+| `GameAssets/envelopes/` | Bundled JSON envelopes + the `.py` sources they were extracted from |
+| `GAME_PLAN.md` | Roadmap, toolchain findings, publication checklist |
+
+This repository started from the
+[GameSkeleton](https://github.com/hhu-adam/GameSkeleton) template.
