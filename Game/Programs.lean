@@ -1,5 +1,6 @@
 import LeanModels.Python.Surface
 import LeanModels.Python.LoopTactic
+import LeanModels.Python.VCTactic
 import LeanModels.Python.Delab
 
 /-!
@@ -33,8 +34,11 @@ load_program midpoint from "GameAssets/envelopes/midpoint.json"
 load_program my_abs from "GameAssets/envelopes/my_abs.json"
 load_program arith from "GameAssets/envelopes/arith.json"
 load_program ag_clamp01 from "GameAssets/envelopes/ag_clamp01.json"
--- Loaded now for World 3 ("Loop World", designed in GAME_PLAN.md):
+-- World 3 ("Loop World"):
 load_program sum_to from "GameAssets/envelopes/sum_to.json"
+load_program odd_sum from "GameAssets/envelopes/odd_sum.json"
+load_program gcd from "GameAssets/envelopes/gcd.json"
+load_program nested_flow from "GameAssets/envelopes/nested_flow.json"
 
 #py_check tri(4) = 10
 #py_check add(2, 3) = 5
@@ -43,3 +47,7 @@ load_program sum_to from "GameAssets/envelopes/sum_to.json"
 #py_check arith.mod(7, 0) raises .zeroDivisionError
 #py_check ag_clamp01.clamp01(7) = 1
 #py_check sum_to(10) = 55
+#py_check odd_sum(7) = 49
+#py_check gcd(12, 18) = 6
+#py_check nested_flow.first_factor(12) = 2
+#py_check nested_flow.first_factor(13) = 13

@@ -8,17 +8,18 @@ against CPython, typed spec surface: `f(a) ==> v`, `py_prove`, `py_loop`, …).
 
 ## Status
 
-- **Built and green**: Worlds 1–2 (9 levels), full `lake build` including
-  `MakeGame`; gamedata generated at `.lake/gamedata/`.
-- **Designed, not built**: Worlds 3–4 (below).
-- Local-only repository; not yet published anywhere.
+- **Built and green**: Worlds 1–3 (16 levels: 4 + 6 + 6), full `lake build`
+  including `MakeGame`; gamedata generated at `.lake/gamedata/`. World 2
+  gained the `py_vcgen` coda (L6 "The machine rises"); World 3 ("Loop
+  World") is built on `py_vcgen` clause + delayed-goal modes.
+- **Designed, not built**: World 4 (RSA World, below) — next up.
 
 ## Toolchain findings (the critical reconciliation)
 
 | Component | Version | Note |
 |---|---|---|
 | Game toolchain | `leanprover/lean4:v4.33.0-rc1` | matches lean-surfaces exactly |
-| lean-surfaces (`lean-models`) | git `60ae7c8df622d50fc3a5a10cba082d3e64d5bd0c` | == public `master` == local `/home/thomas-ahle/lean_models` master; first rev with the `py_check` tactic |
+| lean-surfaces (`lean-models`) | git `8cb98e2e28c8e6a5340a79562d1d9448a49250d1` | == public `master`; the rev that adds `py_vcgen` (VCTactic.lean, the flow-aware VC walker). Previously `60ae7c8d` (first rev with `py_check`) |
 | lean4game GameServer | git tag `v4.31.0` (newest release) | **compiles cleanly under v4.33.0-rc1** |
 | batteries | tag `v4.33.0-rc1` (root-level pin) | shadows GameServer's transitive `v4.31.0` require, which would not build on this toolchain |
 | i18n (hhu-adam) | `v4.31.0` (via GameServer) | compiles cleanly under v4.33.0-rc1 |
@@ -81,50 +82,57 @@ Symbolic inputs, loop-free bodies.
 | 3 | Preconditions are hypotheses | `midpoint_nonneg (ha : 0 ≤ a) (hb : 0 ≤ b) : midpoint(a, b) ==> (a + b) / 2` | `py_corollary [midpoint_spec, Int.fdiv_eq_ediv_of_nonneg]` | preconditions-as-hypotheses, `py_corollary`, value bridging without re-execution |
 | 4 | Fork in the road | `my_abs_spec : my_abs(x) ==> \|x\|` | `py_prove [my_abs]` | branching bodies; `py_prove`'s single-`split` recipe |
 | 5 | **Boss: clamp01** | `clamp01_total : ag_clamp01.clamp01(x) ==> max 0 (min 1 x)` | `refine ⟨32, ?_⟩; by_cases h1 : x < 0 <;> by_cases h2 : 1 < x <;> py_simp [callFunction, ag_clamp01, h1, h2] <;> grind` | the documented boundary of `py_prove` (two sequential `if`s); `refine` (hand the fuel yourself — the move `py_check`/`py_prove` make internally), `py_simp`, `by_cases`, `grind`, `omega` (and why `omega` fails on `PyInt`-branded comparisons) |
+| 6 | **Coda: the machine rises** | `clamp01_machine : ag_clamp01.clamp01(x) ==> min 1 (max 0 x)` | `py_vcgen [ag_clamp01]` + `all_goals omega` | `py_vcgen` (the VC walker: the whole L5 fight, generated), `all_goals`; the payoff framing — and the observation that the walker needs **no fuel**, which is why it survives loops |
 
 (Verified during design: `py_prove [ag_clamp01]` genuinely fails on the boss —
-the level teaches a real boundary, not a staged one.)
+the level teaches a real boundary, not a staged one. The coda states the
+clamp with `min`/`max` nested the *other* way so its statement isn't literally
+L5's.)
 
-### World 3 — Loop World (designed, not built)
+### World 3 — Loop World (built)
 
-`while` loops: the two pieces of content no tactic can invent — the
-**invariant** and the **decreasing measure** — via `py_begin [prog]` +
-`py_loop (inv := …) (dec := …)` (LoopTactic.lean). Envelope `sum_to.json` is
-already bundled and loaded in `Game/Programs.lean`.
+`while` loops on `py_vcgen` (VCTactic.lean, lean-surfaces `8cb98e2e`):
+clause mode `(inv := …) (dec := …)`, and — the world's central mechanic —
+**delayed-goal mode**: `py_vcgen [prog]` bare leaves `case inv1 ⊢ Int → … →
+Prop` and `case dec1 ⊢ Int → … → Nat` goals; assigning them (with `exact
+fun … => …`) instantiates every downstream residual, so wrong invariants
+produce *residual goals as feedback*. Residual tags: `init`, `preserve`,
+`dec`, `exit` (an ∃-shaped repack of invariant + negated test at the exit
+point — `grind` food), `ret`.
 
-Planned levels, with the Template/Hole invariant pedagogy — lean4game's
-`Template`/`Hole` tactics let a level ship the proof *skeleton* with only the
-invariant (or only the measure) as a hole, so each level isolates exactly one
-new cognitive load:
+| # | Level | Statement | Proof | Introduces |
+|---|---|---|---|---|
+| 1 | Anatomy of a loop proof | `tri_total (hn : 0 ≤ n) : tri(n) ==> n * (n + 1) / 2` | full clause-mode proof as a visible `Template`; player fills two `grind` Holes (`case ret` finish + `all_goals`) | invariant/measure as clauses, the residual tags, `case`, `obtain`/`rfl`, `Int` |
+| 2 | **Invent the invariant** (the heart) | same claim, anonymous | `py_vcgen [tri]` bare → player answers `inv1`/`dec1` with `exact fun total i => …`, then closes the residuals | delayed-goal mode; `exact`; the two honest failure modes (below) |
+| 3 | The sum of odd numbers | `odd_sum_total (hn : 0 ≤ n) : odd_sum(n) ==> n * n` | clauses from scratch (`total = k * k` + range; `(n - k).toNat`), `all_goals grind` sweeps everything incl. `ret` | first from-scratch invariant; fresh envelope `odd_sum` (extracted with lean-surfaces' extractor) |
+| 4 | The shadowed variable | `sum_to_total (N) (hN : 0 ≤ N) : sum_to(N) ==> N * (N + 1) / 2` | clauses with binders `(s n : Int)`; `case ret => obtain rfl : n' = 0` | the shadowing rule exactly as the gallery's reproved sum_to: the loop mutates Python's `n`, so the *theorem* binds the initial value as capital `N` and the clause binder `n` means the current value (the walker's counterpart of `py_loop`'s `(state := …)`) |
+| 5 | Euclid's invariant | `gcd_total (hA : 0 ≤ A) (hB : 0 ≤ B) : gcd(A, B) ==> Int.gcd A B` | Template: clauses + 5 bullet residuals (exit-packaging bullet given; Holes for `Int.fmod_nonneg`, `gcd_fmod_step` rewrite, the `Int.fmod_lt_of_pos` measure argument, and the `grind [gcd_zero_right, natAbs_of_nonneg]` payout) | an invariant that is a *theorem* (gcd-preservation); the `Int.fmod` spec-side library as `NewTheorem`s; `rw`, `have` |
+| 6 | **Boss: the nested machine** | `first_factor_even (hn : 2 ≤ n) (h2 : 2 ∣ n) : nested_flow.first_factor(n) ==> 2` | `have hn2` rebrand; `py_vcgen [nested_flow]` with **five clauses** (`inv1`/`dec1`, `inv2`/`dec2`, `exit2`); `all_goals grind` | numbered clauses for nested loops; the `exit` clause a `break` requires; outer invariant `i = 2` = an *unreachability* invariant (outer preserve/dec residuals are `⊢ False` with contradictory hyps) |
 
-1. **Loop, concretely** — `tri(6) ==> 21` by `py_check`:
-   loops cost nothing when inputs are concrete; sets up the contrast.
-2. **Read an invariant** — `tri_total (hn : 0 ≤ n) : tri(n) ==> n * (n + 1) / 2`,
-   full proof given as visible Template (as W1L4 did for `py_prove`):
-   `py_begin [tri]` + `py_loop (inv := fun (total i : Int) => 0 ≤ i ∧ i ≤ n + 1 ∧ 2 * total = i * (i - 1)) (dec := fun (total i : Int) => (n + 1 - i).toNat)`
-   + exit algebra `obtain rfl : i' = n + 1 := by omega; grind` + `all_goals grind`.
-   The level's text walks through what each residual goal *is* (exit algebra,
-   preservation, measure decrease, initial invariant).
-3. **Fill in the measure** — same theorem, Template with `dec := Hole` (the
-   invariant given); player supplies `(n + 1 - i).toNat`.
-4. **Fill in the invariant** — `sum_to_total (hn : 0 ≤ n) : sum_to(n) ==> n * (n + 1) / 2`,
-   Template gives the scaffold incl. `(state := [s, n])` (the countdown loop
-   mutates `n`, the binder-shadowing escape hatch) and `dec := fun (s k : Int) => k.toNat`;
-   player supplies `inv := fun (s k : Int) => 0 ≤ k ∧ k ≤ n ∧ 2 * s = (n - k) * (n + k + 1)`.
-   Hints keyed to each residual goal.
-5. **Boss: gcd** — `Examples/python/gcd` (envelope to be bundled): Euclid's
-   loop, invariant over `%`, the `gcd_emod_step`/`gcd_fmod_step` spec-side
-   lemmas from Surface.lean as `NewTheorem`s.
+Boss scoping, honestly: the gallery's unconditional
+`first_factor_total` (`==> n.toNat.minFac`) needs mathlib (`minFac`
+machinery) which the game deliberately never builds — so the boss proves the
+**even case** (`2 ∣ n → returns 2`), which exercises the *full* control
+shape (nested `while`, `break`-in-`if`, mid-loop `return`, `exit2` clause —
+"the proof `py_loop` could never do") while keeping every residual
+elementary (`grind` sweeps all nine). The conclusion points at the gallery
+proof as the same clause skeleton with number theory in the residuals.
 
-New inventory: `py_begin`, `py_loop`, `obtain`, `all_goals` (+ TacticDocs
-adapted from LoopTactic.lean's excellent docstrings). Risk to test when
-building: `py_loop`'s named-argument atoms (`inv`, `dec`, `state`) vs the
-game's atom-based tactic checker — if the checker flags `inv`/`dec` as
-"tactics", they may need adding to a hidden inventory entry or upstream
-`ALLOWED_KEYWORDS`. (`only`, `at`, `fun`, `if/then/else` are already
-whitelisted; `inv`/`dec`/`state` are not.)
+L2's wrong-invariant pedagogy, as *actually verified* on this toolchain:
 
-### World 4 — RSA World (designed, not built)
+* **too weak** (books without range conjuncts): `init`/`preserve`/`dec`/
+  `exit` all close; the `ret` goal is left with only `hcont : n < i'` and is
+  honestly unprovable — `grind` fails with a countermodel-flavored
+  diagnostic. This is the level's central lesson (true ≠ useful).
+* **wrong measure** (`i.toNat` for a counting-up loop): the `dec` residual
+  comes back `(i + 1).toNat < i.toNat` — visibly false.
+* The planned third failure ("missing the `2 * total` form → `grind` stalls
+  on division") is **not real on v4.33**: grind's integer-division theory
+  closes the `total = i * (i - 1) / 2` form end-to-end. The level keeps the
+  multiplication-free house style but tells the truth about why (it matters
+  on later programs, e.g. the `gcd` residuals, not on `tri`).
+
+### World 4 — RSA World (designed, not built — NEXT)
 
 The framework's real-world capstone, `Examples/python/rsa_inverse`:
 `extended_gcd` + `inverse` from **python-rsa 4.9.1, byte-verbatim**.
@@ -181,20 +189,55 @@ Things worth knowing when extending the game:
    fuel witness + kernel `rfl` for both `==>` and `==>!` concrete goals; the
    game now teaches that instead. A `DecidableEq` affordance on `Res`/`Val`
    (so `decide` also works) remains queued upstream.
+8. **The `(inv := …)` named-argument risk is a non-issue** (the flagged W3
+   risk, tested first thing): `py_vcgen`'s clause labels are *idents* in its
+   grammar (`pyVcgenClause := " (" ident " := " term ")"`), not atoms — and
+   both checkers (build-time `collectUsedInventory`, runtime
+   `findForbiddenTactics`) police only alphabetic **atoms** (as tactics) and
+   idents that resolve to **global theorems**. `inv`/`dec`/`inv2`/`exit2`
+   don't resolve to anything, so they're invisible. No `ALLOWED_KEYWORDS`
+   change, no hidden-inventory hack. (This also covers `case inv1`/`case
+   ret`: the case tags are unresolvable idents.)
+9. **Idents in sample proofs that DO resolve must be introduced.** `Int` (in
+   every `fun (total i : Int) => …` clause) resolves to a definition →
+   `NewDefinition Int` (LoopWorld L1, with a doc that earns its tile);
+   `rfl` inside `obtain rfl : …` patterns resolves to the *theorem* `rfl` →
+   `NewTheorem rfl` (L1) besides `NewTactic rfl`. Dot-notation projections
+   (`.toNat`) never resolve — postfix forms are checker-friendly.
+10. **`Hole` counts as a used tactic** exactly like `Template` (friction #2)
+    — `NewHiddenTactic Hole` in the first templated LoopWorld level.
+11. **`Hole` wraps tactics only, not terms** — you cannot hole out a single
+    clause inside a `py_vcgen` call, so "player supplies just the invariant"
+    is *not* a Template shape. Delayed-goal mode is the right tool for that
+    anyway (and it's better pedagogy: wrong guesses produce residuals as
+    feedback instead of a parse error).
+12. **v4.33 `grind` is stronger than the W3 design assumed.** It closes the
+    `total = i * (i - 1) / 2` division-form invariant end-to-end (the
+    planned "grind stalls on division" failure mode is not real on this
+    toolchain — L2 teaches the two failure modes that *are* real: a too-weak
+    invariant leaves an unprovable `ret`, a non-decreasing measure leaves a
+    visibly false `dec`). It also sweeps all nine residuals of the boss's
+    even case, including the ∃-shaped `exit` repack goals. What it still
+    cannot do: the `gcd` residuals over `Int.fmod` (even given the right
+    lemmas as grind parameters) — hence L5's bullet-by-bullet proof, which
+    is the better level for it.
+13. **`py_vcgen` must be imported explicitly** — `Game/Programs.lean` now
+    imports `LeanModels.Python.VCTactic` alongside Surface/LoopTactic/Delab
+    (it is not reachable from the other three; symptom: `unknown tactic`).
+14. **`lake update` now runs mathlib's `cache get` post-update hook**
+    (~30–60 min on a cold network) even though the game never builds
+    mathlib. Harmless, but budget for it when bumping the pin.
 
 ## Publication checklist (per lean4game docs)
 
-Everything below is deliberately **not done** (local-only mandate):
-
-- [ ] Create a public GitHub repository (e.g. `thomasnormal/python-proof-game`)
-      and push.
+- [x] Public GitHub repository `thomasnormal/python-proof-game`, pushed.
 - [x] Game metadata in `Game.lean`: `Title`, `Introduction`, `Info`,
       `Languages "en"`, `CaptionShort`, `CaptionLong` (all set;
       `Prerequisites`/`CoverImage` optional — a cover image at ≤ ~500×200 px
       under `images/` is the one nice-to-have still missing).
 - [x] Dependency form: the lakefile already uses the **git** dependency on
       `https://github.com/thomasnormal/lean-surfaces` pinned to rev
-      `60ae7c8d…` (no path deps anywhere), so the repo is publication-ready
+      `8cb98e2e…` (no path deps anywhere), so the repo is publication-ready
       as-is. If you iterate against a local checkout meanwhile, switch the
       `require` to `from "/path/to/lean_models"` and back before pushing.
 - [ ] Ensure the GitHub Actions workflow from GameSkeleton

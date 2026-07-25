@@ -1,8 +1,9 @@
 /- Smoke test for The Python Proof Game levels — NOT part of the game build.
 Run from the game root with `lake env lean GameAssets/smoke_test.lean`.
-Trials every planned World 1 / World 2 statement with its intended proof. -/
+Trials every World 1 / World 2 / World 3 statement with its intended proof. -/
 import LeanModels.Python.Surface
 import LeanModels.Python.LoopTactic
+import LeanModels.Python.VCTactic
 import LeanModels.Python.Delab
 
 open LeanModels LeanModels.Python
@@ -13,6 +14,10 @@ load_program midpoint from "GameAssets/envelopes/midpoint.json"
 load_program my_abs from "GameAssets/envelopes/my_abs.json"
 load_program arith from "GameAssets/envelopes/arith.json"
 load_program ag_clamp01 from "GameAssets/envelopes/ag_clamp01.json"
+load_program sum_to from "GameAssets/envelopes/sum_to.json"
+load_program odd_sum from "GameAssets/envelopes/odd_sum.json"
+load_program gcd from "GameAssets/envelopes/gcd.json"
+load_program nested_flow from "GameAssets/envelopes/nested_flow.json"
 
 -- #py_check non-vacuity, as the levels' Introductions will cite them
 #py_check tri(4) = 10
@@ -61,3 +66,80 @@ example (x : PyInt) : ag_clamp01.clamp01(x) ==> max 0 (min 1 x) := by
 -- the manual toolbox). Expect this to error if uncommented:
 -- example (x : PyInt) : ag_clamp01.clamp01(x) ==> max 0 (min 1 x) := by
 --   py_prove [ag_clamp01]
+
+-- W2L6 (coda): the same boss shape, generated — one py_vcgen call + sweep
+example (x : PyInt) : ag_clamp01.clamp01(x) ==> min 1 (max 0 x) := by
+  py_vcgen [ag_clamp01]
+  all_goals omega
+
+-- W3L1: tri, clause form (the level's Template with its Holes filled)
+theorem tri_total (n : PyInt) (hn : 0 ≤ n) : tri(n) ==> n * (n + 1) / 2 := by
+  py_vcgen [tri]
+    (inv := fun (total i : Int) => 0 ≤ i ∧ i ≤ n + 1 ∧ 2 * total = i * (i - 1))
+    (dec := fun (total i : Int) => (n + 1 - i).toNat)
+  case ret =>
+    obtain rfl : i' = n + 1 := by omega
+    grind
+  all_goals grind
+
+-- W3L2: tri, DELAYED mode — the player invents the invariant mid-proof
+example (n : PyInt) (hn : 0 ≤ n) : tri(n) ==> n * (n + 1) / 2 := by
+  py_vcgen [tri]
+  case inv1 => exact fun total i => 0 ≤ i ∧ i ≤ n + 1 ∧ 2 * total = i * (i - 1)
+  case dec1 => exact fun total i => (n + 1 - i).toNat
+  case ret =>
+    obtain rfl : i' = n + 1 := by omega
+    grind
+  all_goals grind
+
+-- W3L3: odd_sum — player-invented invariant from scratch
+theorem odd_sum_total (n : PyInt) (hn : 0 ≤ n) : odd_sum(n) ==> n * n := by
+  py_vcgen [odd_sum]
+    (inv := fun (total k : Int) => 0 ≤ k ∧ k ≤ n ∧ total = k * k)
+    (dec := fun (total k : Int) => (n - k).toNat)
+  all_goals grind
+
+-- W3L4: sum_to — the countdown shadows its own argument; theorem binds `N`
+theorem sum_to_total (N : PyInt) (hN : 0 ≤ N) : sum_to(N) ==> N * (N + 1) / 2 := by
+  py_vcgen [sum_to]
+    (inv := fun (s n : Int) => 0 ≤ n ∧ n ≤ N ∧ 2 * s = (N - n) * (N + n + 1))
+    (dec := fun (s n : Int) => n.toNat)
+  case ret =>
+    obtain rfl : n' = 0 := by omega
+    grind
+  all_goals grind
+
+-- W3L5: gcd — Euclid's invariant (the level's Template with Holes filled)
+theorem gcd_total (A B : PyInt) (hA : 0 ≤ A) (hB : 0 ≤ B) :
+    gcd(A, B) ==> Int.gcd A B := by
+  py_vcgen [gcd]
+    (inv := fun (a b : Int) => 0 ≤ a ∧ 0 ≤ b ∧ Int.gcd a b = Int.gcd A B)
+    (dec := fun (a b : Int) => b.toNat)
+  · exact ⟨a, ⟨rfl, hx⟩, hcore.1, by rw [← hcore.2.2, hx, Int.gcd_zero_right]⟩
+  · exact Int.fmod_nonneg hinv1 hinv2
+  · rw [gcd_fmod_step hinv1 hinv2]
+    exact hinv3
+  · have h1 := Int.fmod_lt_of_pos a (b := b) (by omega)
+    have h2 := Int.fmod_nonneg hinv1 hinv2
+    omega
+  · grind [Int.gcd_zero_right, Int.natAbs_of_nonneg]
+
+-- W3L6 (boss): nested loop + break + mid-loop return, even case —
+-- five clauses (two inv/dec pairs + the break's exit2 fact), one sweep
+theorem first_factor_even (n : PyInt) (hn : 2 ≤ n) (h2 : (2:Int) ∣ n) :
+    nested_flow.first_factor(n) ==> 2 := by
+  have hn2 : (2 : Int) ≤ n := hn
+  py_vcgen [nested_flow]
+    (inv1 := fun (i : Int) => i = 2)
+    (dec1 := fun (i : Int) => (n - i).toNat)
+    (inv2 := fun (m : Int) => 0 ≤ m ∧ (2:Int) ∣ (n - m))
+    (dec2 := fun (m : Int) => m.toNat)
+    (exit2 := fun (m : Int) => 0 ≤ m ∧ m < i ∧ (2:Int) ∣ (n - m))
+  all_goals grind
+
+-- Non-vacuity for the new programs, as the level texts cite them
+#py_check sum_to(10) = 55
+#py_check odd_sum(7) = 49
+#py_check gcd(12, 18) = 6
+#py_check nested_flow.first_factor(12) = 2
+#py_check nested_flow.first_factor(13) = 13

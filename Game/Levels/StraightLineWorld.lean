@@ -3,6 +3,7 @@ import Game.Levels.StraightLineWorld.L02_MidpointSpec
 import Game.Levels.StraightLineWorld.L03_MidpointNonneg
 import Game.Levels.StraightLineWorld.L04_MyAbs
 import Game.Levels.StraightLineWorld.L05_Clamp01Boss
+import Game.Levels.StraightLineWorld.L06_MachineRises
 
 World "StraightLineWorld"
 Title "Straight-Line World"
@@ -17,5 +18,7 @@ the inputs left abstract. Along the way you'll learn the framework's honesty
 rules — Python's `//` is *floor* division and the statements say so;
 preconditions are ordinary hypotheses; corollaries are derived by arithmetic,
 never by re-running code — and at the end, a boss fight at the exact
-documented boundary where the automation stops and you take over.
+documented boundary where the automation stops and you take over. Then, in
+the coda, everything you did by hand comes back *generated*: your first
+meeting with `py_vcgen`, the machine that carries the rest of the game.
 "

@@ -65,10 +65,9 @@ Boss down. You just did by hand what `py_prove` does inside — fuel, symbolic
 execution, case analysis, arithmetic — on a shape the automation honestly
 refuses.
 
-That's Straight-Line World cleared. Beyond this point lies **Loop World**:
-`while` loops, where no finite case split saves you and you'll meet the two
-ideas no tactic can invent for you — the *invariant* and the *decreasing
-measure*. See you there.
+One more stop before the loops. Everything you just did — fuel, branch
+facts, symbolic runs, the sweep — was a *procedure*. And procedures can be
+mechanized. Next level, the machine rises.
 "
 
 NewTactic refine py_simp by_cases grind omega

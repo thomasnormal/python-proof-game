@@ -96,6 +96,96 @@ comparison. A hypothesis stated over the `PyInt` brand can be invisible to it
 — when that happens, use `grind`, which unfolds reducible definitions. -/
 TacticDoc omega
 
+/-- `py_vcgen [prog]` is the **VC-generating walker** — the whole manual
+pipeline, mechanized. From a `f(args) ==> v` goal it bridges to the function
+body and walks it statement by statement: straight-line segments are
+discharged by captured symbolic execution, an `if` forks the walk per branch,
+and each `while` is opened by the loop rule. Everything the interpreter can
+answer is answered on the spot; what it cannot invent is *appended* as goals —
+pure mathematics over named atoms, tagged by their role: `init` (the invariant
+holds on entry), `preserve` (one loop body keeps it), `dec` (the measure
+drops), `exit`/`ret` (from the exit facts to the returned value).
+
+Loops need the two pieces of content no tactic can invent — the **invariant**
+and the **decreasing measure**. Hand them over as clauses:
+
+```
+py_vcgen [prog]
+  (inv := fun (x y : Int) => …)
+  (dec := fun (x y : Int) => …)
+```
+
+The i-th `inv`/`dec` pair belongs to the i-th `while` (source order; label
+them `inv1`, `dec1`, … when there are several). Binder names must be the
+Python names of the variables **assigned in that loop's body**; everything
+else stays pinned and can be mentioned directly. *Omit* the clauses and the
+walker leaves them as delayed goals `inv1`/`dec1` — the proof pauses until you
+invent the invariant. An `(exit := …)` clause states a loop's exit fact
+explicitly — required when a `break` escapes a loop and the code after it
+needs more than the bare invariant. -/
+TacticDoc py_vcgen
+
+/-- `all_goals tac` runs `tac` on every remaining goal and insists it closes
+them all.
+
+The house finisher after `py_vcgen`: the walker leaves a handful of
+arithmetic residuals, and `all_goals grind` (or `all_goals omega`) sweeps
+them in one line. Handle any goal that needs special treatment first (e.g.
+with `case ret => …`), then sweep the rest. -/
+TacticDoc all_goals
+
+/-- `case tag => tac` focuses the (first) goal tagged `tag`.
+
+`py_vcgen` tags everything it leaves behind: delayed loop clauses are
+`inv1`, `dec1`, …; math residuals are `init`, `preserve`, `dec`, `exit`,
+`ret`. So `case inv1 => …` answers the walker's request for an invariant,
+and `case ret => …` picks out the return-value goal for special treatment
+before an `all_goals` sweep. -/
+TacticDoc case
+
+/-- `exact e` closes the goal with the term `e`, exactly.
+
+In this world you mostly use it to *hand over data*: a delayed clause goal
+like `inv1 : Int → Int → Prop` is closed by
+`exact fun total i => 0 ≤ i ∧ …` — not a proof, a *definition* of the
+invariant. Assigning it instantiates every residual goal that mentions it. -/
+TacticDoc exact
+
+/-- `obtain pat : P := by tac` proves `P` on the side and destructs it into
+the pattern `pat` — and the pattern `rfl` means: the proof is an equation,
+*substitute it everywhere*.
+
+The house move for exit algebra: after a loop, the negated test and the range
+conjunct pin the loop variable (e.g. `i' = n + 1`); `obtain rfl : i' = n + 1
+:= by omega` proves it and rewrites the goal, and the remaining algebra falls
+to `grind`. -/
+TacticDoc obtain
+
+/-- `rfl` proves goals of the form `a = a` — both sides identical up to
+computation.
+
+In this game you'll mostly meet it as the *pattern* in
+`obtain rfl : x = e := by …`: prove the equation, then substitute it
+everywhere instead of keeping it as a hypothesis. -/
+TacticDoc rfl
+
+/-- `have h : P := e` (or `have h : P := by tac`) adds a proved fact `h : P`
+to the context.
+
+House use: **rebranding**. A hypothesis stated over `PyInt` (the brand on
+statement binders) can be invisible to `omega`, which inspects head types.
+`have hn2 : (2 : Int) ≤ n := hn` restates it at `Int` — same proof, now
+`omega`-visible. -/
+TacticDoc «have»
+
+/-- `rw [h₁, h₂, …]` rewrites the goal left-to-right with the given
+equations; `rw [← h]` rewrites right-to-left.
+
+In Loop World it bridges *spec-side* algebra — e.g. rewriting with the
+Euclid step `gcd_fmod_step` to show an invariant survives one loop
+iteration. The interpreter is long gone by then; this is mathematics. -/
+TacticDoc rw
+
 /-- `f(args…) ==> v` — **total correctness**, the game's main judgment: the
 Python call terminates and returns `v`. Formally `CallsTo m "f" #[…] v`:
 *there exists* a fuel making the verified interpreter return `.ok v`. The
@@ -206,3 +296,127 @@ a.fdiv b = a / b` — the bridge between Python's floor division and Lean's `/`
 `2`). Feed it to `py_corollary` as a value rewrite to restate an `Int.fdiv`
 result in `/` form. -/
 TheoremDoc Int.fdiv_eq_ediv_of_nonneg as "fdiv_eq_ediv_of_nonneg" in "Int"
+
+/-- `rfl : a = a` — the proof that anything equals itself, computation
+included.
+
+You meet it in two costumes: as a *tactic* closing `a = a` goals, and as the
+*pattern* in `obtain rfl : x = e := by …` — prove the equation, then
+substitute it everywhere instead of carrying it around. -/
+TheoremDoc rfl as "rfl" in "Logic"
+
+/-- `Int` — Lean's arbitrary-precision integers, the type your *invariants*
+speak.
+
+Loop-clause binders are `Int`-valued: in
+`(inv := fun (total i : Int) => …)` the binder names are the Python
+variables the loop assigns, read back as honest integers. (`PyInt`, the
+brand on statement binders, is definitionally `Int` — same numbers,
+different hat.) -/
+DefinitionDoc Int as "Int"
+
+/-- `Int.gcd a b` — the greatest common divisor, as a spec-side function
+(always nonnegative; `Int.gcd 0 b = |b|`). This is the *mathematical*
+yardstick the Python `gcd` program is measured against — the program shuffles
+`a, b = b, a % b`; the theorem says the answer is `Int.gcd a b`. -/
+DefinitionDoc Int.gcd as "Int.gcd"
+
+/-- The loaded program `odd_sum` — sums the first `n` odd numbers:
+
+```python
+def odd_sum(n):
+    total = 0
+    k = 0
+    while k < n:
+        total = total + 2 * k + 1
+        k = k + 1
+    return total
+```
+
+`1 + 3 + 5 + ⋯` — the classic. What it returns is prettier than what it
+does. -/
+DefinitionDoc odd_sum as "odd_sum" in "Python programs"
+
+/-- The loaded program `sum_to` — triangular numbers again, but counting
+**down**, mutating its own argument:
+
+```python
+def sum_to(n: int) -> int:
+    s = 0
+    while n > 0:
+        s += n
+        n -= 1
+    return s
+```
+
+The Python variable `n` is *assigned in the loop body* — so in a loop clause,
+the binder `n` must mean the current, mutated value. The name for the
+initial value is up to your theorem statement (the house style: capital
+`N`). -/
+DefinitionDoc sum_to as "sum_to" in "Python programs"
+
+/-- The loaded program `gcd` — Euclid's algorithm, verbatim:
+
+```python
+def gcd(a: int, b: int) -> int:
+    while b != 0:
+        a, b = b, a % b
+    return a
+```
+
+Tuple assignment, and Python's `%` — which is `Int.fmod` (sign follows the
+divisor), not Lean's `%`. The spec-side lemma `gcd_fmod_step` speaks exactly
+that dialect. -/
+DefinitionDoc gcd as "gcd" in "Python programs"
+
+/-- The loaded module `nested_flow` — the final boss's lair:
+
+```python
+def first_factor(n: int) -> int:
+    i = 2
+    while i * i <= n:
+        m = n
+        while 0 < m:
+            if m < i:
+                break
+            m = m - i
+        if m == 0:
+            return i
+        i = i + 1
+    return n
+```
+
+A `while` inside a `while`, a `break` inside an `if` in the inner body, and a
+`return` out of the middle of the outer loop. Trial division where even the
+divisibility *test* is a loop (repeated subtraction: `m == 0` afterwards
+means `i` divides `n`). -/
+DefinitionDoc nested_flow as "nested_flow" in "Python programs"
+
+/-- `gcd_fmod_step : 0 ≤ a → 0 ≤ b → Int.gcd b (Int.fmod a b) = Int.gcd a b`
+— Euclid's step in the exact shape the interpreter emits: Python's `%` is
+`Int.fmod`, and swapping `(a, b) ↦ (b, a % b)` preserves the gcd. This is
+the heart of the `gcd` loop invariant's preservation.
+
+The sign hypotheses are not decoration: `Int.gcd 4 (-6) = 2`, but Python's
+`4 % -6` is `-2` — and CPython agrees. -/
+TheoremDoc LeanModels.Python.gcd_fmod_step as "gcd_fmod_step" in "Python programs"
+
+/-- `Int.fmod_nonneg : 0 ≤ a → 0 ≤ b → 0 ≤ a.fmod b` — Python's `%` never
+goes negative when both operands are nonnegative. Keeps the `gcd` loop
+invariant's range conjuncts alive across an iteration. -/
+TheoremDoc Int.fmod_nonneg as "fmod_nonneg" in "Int"
+
+/-- `Int.fmod_lt_of_pos : ∀ (a : Int), 0 < b → a.fmod b < b` — the remainder
+is strictly smaller than a positive divisor. This is why Euclid *terminates*:
+the measure `b.toNat` strictly drops each iteration. -/
+TheoremDoc Int.fmod_lt_of_pos as "fmod_lt_of_pos" in "Int"
+
+/-- `Int.gcd_zero_right : Int.gcd a 0 = a.natAbs` — when the loop is done
+(`b = 0`), the gcd is just `|a|`. The last algebraic step of the `gcd`
+proof. -/
+TheoremDoc Int.gcd_zero_right as "gcd_zero_right" in "Int"
+
+/-- `Int.natAbs_of_nonneg : 0 ≤ a → ↑a.natAbs = a` — drop the absolute value
+when the sign is known. Pairs with `gcd_zero_right` to finish the `gcd`
+return goal. -/
+TheoremDoc Int.natAbs_of_nonneg as "natAbs_of_nonneg" in "Int"
