@@ -71,6 +71,14 @@ branch tests the symbolic input leaves open.
 shape falls outside `py_prove`'s recipe. -/
 TacticDoc py_simp
 
+/-- `intro h` — when the goal is an implication `P → Q` (or a `∀`), move the
+antecedent into the context as a hypothesis `h : P`, leaving `Q` to prove.
+
+The move that opens every *negation* proof: `¬ P` in Lean **is** the
+implication `P → False`, so on a goal `¬ P`, `intro h` hands you `h : P` and
+the goal `False` — assume the impossible thing, then demolish it. -/
+TacticDoc intro
+
 /-- `by_cases h : P` splits the proof into two: one goal with `h : P`, one
 with `h : ¬P`.
 
@@ -80,20 +88,27 @@ The house pattern for multi-`if` Python bodies: decide every test up front
 TacticDoc by_cases
 
 /-- `grind` is core Lean's general-purpose finisher: congruence closure plus
-e-matching over your hypotheses.
+e-matching plus integer arithmetic over your hypotheses.
 
-Why not `omega` here? With binders at `PyInt` (a brand for `Int`), comparisons
-introduced by `by_cases` elaborate brand-headed, and `omega` skips any
-comparison whose head type is the brand. `grind` matches up to reducible
-unfolding, so it sees through the brand and closes the arithmetic. -/
+Why not `omega`? Two reasons that recur in this game. First, comparisons
+*stated over the `PyInt` brand* — a statement binder's `0 < b`, a `by_cases`
+split, a `b ≠ 0` goal of your own — elaborate brand-headed, and `omega`
+skips anything whose head type is the brand; `grind` matches up to reducible
+unfolding, so it sees through. Second, `omega` is strictly *linear*: a
+product of two variables like `b * q` is out of its language, while `grind`
+happily treats it as an atom and reasons around it. -/
 TacticDoc grind
 
 /-- `omega` decides linear integer arithmetic goals: anything built from
 `Int`/`Nat` variables with `+`, `-`, `*`-by-constants, `≤`, `<`, `=`.
 
-Caveat learned in this game: `omega` looks at the *head type* of each
-comparison. A hypothesis stated over the `PyInt` brand can be invisible to it
-— when that happens, use `grind`, which unfolds reducible definitions. -/
+Caveats learned in this game: `omega` looks at the *head type* of each
+comparison — a fact stated over the `PyInt` brand is invisible to it (use
+`grind`, which unfolds reducible definitions). It atomizes anything else it
+doesn't understand — `Int.fdiv a b` is an opaque symbol to it, and `b * q`
+with both sides variables is out of its (linear) language. Inside its
+language, though, it is a decision procedure: it *will* finish, e.g. by
+refuting `-3 = -4`. -/
 TacticDoc omega
 
 /-- `py_vcgen [prog]` is the **VC-generating walker** — the whole manual
@@ -172,10 +187,13 @@ TacticDoc rfl
 /-- `have h : P := e` (or `have h : P := by tac`) adds a proved fact `h : P`
 to the context.
 
-House use: **rebranding**. A hypothesis stated over `PyInt` (the brand on
-statement binders) can be invisible to `omega`, which inspects head types.
-`have hn2 : (2 : Int) ≤ n := hn` restates it at `Int` — same proof, now
-`omega`-visible. -/
+House uses, in order of appearance: **staging** — pull the pieces of an
+argument into the context one line at a time (a run fact proved by
+`py_prove`, the division-algorithm bounds, a determinism equation), then let
+a finisher sweep the assembled facts; and **rebranding** — a hypothesis
+stated over `PyInt` (the brand on statement binders) can be invisible to
+`omega`, and `have hn2 : (2 : Int) ≤ n := hn` restates it at `Int` — same
+proof, now `omega`-visible. -/
 TacticDoc «have»
 
 /-- `rw [h₁, h₂, …]` rewrites the goal left-to-right with the given
@@ -191,7 +209,9 @@ Python call terminates and returns `v`. Formally `CallsTo m "f" #[…] v`:
 *there exists* a fuel making the verified interpreter return `.ok v`. The
 identifier is both the loaded module constant and the function name; a dotted
 identifier `arith.mod(a, b)` splits into module `arith`, function `"mod"`.
-Preconditions stay ordinary hypotheses. -/
+Preconditions stay ordinary hypotheses. In hypothesis position the same
+judgment can be written `f(args…) ⇓ r`, *binding* the result — see the `⇓`
+entry. -/
 DefinitionDoc LeanModels.Python.CallsTo as "==>"
 
 /-- `f(args…) ==>! e` — **exceptions as specified behavior**: the call
@@ -200,6 +220,29 @@ errors in the semantic tier are real and faithful — `7 % 0` doesn't “go
 wrong”, it provably raises `ZeroDivisionError`, and that is a theorem you can
 state and prove. -/
 DefinitionDoc LeanModels.Python.Raises as "==>!"
+
+/-- `f(args…) ⇓ r` — the **result-binding arrow**: exactly the same judgment
+as `f(args…) ==> r`, written in *hypothesis position*. A hypothesis
+`hq : arith.floordiv(a, b) ⇓ q` reads: “the call terminated, and `q` names
+whatever it returned.” Because both arrows target the same judgment, the
+goal view renders `⇓` as `==>` — the meaning is identical; only the role
+differs: `==>` *states* what a run returns, `⇓` *binds* it so your theorem
+can talk about the result without naming a formula for it.
+
+Pair it with determinism (`CallsTo.typed_int_eq`) to replace the bound name
+by a value you have proved. -/
+DefinitionDoc ResultArrow as "⇓"
+
+/-- `CallsTo.typed_int_eq : f(…) ⇓ r → f(…) ==> e → r = e` — **determinism**
+of the verified interpreter, on the typed surface: one call cannot return
+two different integers. Feed it two descriptions of the same run — typically
+a `⇓` hypothesis binding an unknown result, and a spec theorem or `py_check`
+fact you proved — and it welds them into an equation.
+
+This is the engine behind `py_corollary`, used by hand: **run once, equate
+forever**. It is also how you *refute* a wrong return value: two different
+literals for one run collapse into a false equation like `-3 = -4`. -/
+TheoremDoc LeanModels.Python.CallsTo.typed_int_eq as "CallsTo.typed_int_eq" in "Python programs"
 
 /-- The loaded program `tri` — the game's opening act:
 
@@ -296,6 +339,29 @@ a.fdiv b = a / b` — the bridge between Python's floor division and Lean's `/`
 `2`). Feed it to `py_corollary` as a value rewrite to restate an `Int.fdiv`
 result in `/` form. -/
 TheoremDoc Int.fdiv_eq_ediv_of_nonneg as "fdiv_eq_ediv_of_nonneg" in "Int"
+
+/-- `Int.fmod a b` — **Python's `%`**: the remainder whose sign follows the
+*divisor* (`7 % -2 == -1` in Python, and `Int.fmod 7 (-2) = -1`). It is the
+partner of `Int.fdiv` in the division algorithm: quotient `Int.fdiv a b`,
+remainder `Int.fmod a b`, and `Int.fmod_add_fdiv_mul` reassembles them into
+`a`. Lean's own `%` on `Int` is Euclidean (`Int.emod`) — same honesty rule
+as for `//`: theorems about Python's `%` say `Int.fmod`. -/
+DefinitionDoc Int.fmod as "Int.fmod"
+
+/-- `Int.fmod_add_fdiv_mul : a.fmod b + a.fdiv b * b = a` — **the division
+algorithm**, in Python's dialect: floor-remainder plus floor-quotient times
+divisor reassembles the dividend. This single equation, together with the
+remainder's range (`Int.fmod_nonneg_of_pos`, `Int.fmod_lt_of_pos`),
+*characterizes* what `//` and `%` compute — it is where “floor really
+floors” comes from. -/
+TheoremDoc Int.fmod_add_fdiv_mul as "fmod_add_fdiv_mul" in "Int"
+
+/-- `Int.fmod_nonneg_of_pos : ∀ (a : Int), 0 < b → 0 ≤ a.fmod b` — for a
+*positive divisor*, Python's `%` is never negative, whatever the sign of the
+dividend (`-7 % 2 == 1` in Python). One half of the remainder's range; the
+other half is `Int.fmod_lt_of_pos`. (Compare `Int.fmod_nonneg`, which asks
+both operands to be nonnegative — here the dividend runs free.) -/
+TheoremDoc Int.fmod_nonneg_of_pos as "fmod_nonneg_of_pos" in "Int"
 
 /-- `rfl : a = a` — the proof that anything equals itself, computation
 included.

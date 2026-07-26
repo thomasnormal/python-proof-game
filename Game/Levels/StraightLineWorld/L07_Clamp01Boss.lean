@@ -1,9 +1,9 @@
-import Game.Levels.StraightLineWorld.L04_MyAbs
+import Game.Levels.StraightLineWorld.L06_MyAbs
 
 open LeanModels LeanModels.Python
 
 World "StraightLineWorld"
-Level 5
+Level 7
 
 Title "Boss: clamp01"
 
@@ -35,7 +35,8 @@ The house pattern for multi-`if` bodies:
 3. **Execute**: `py_simp [callFunction, ag_clamp01, h1, h2]` — symbolic
    execution with your case facts resolving both tests.
 4. **Finish**: `grind` — *not* `omega`: the `by_cases` comparisons elaborate
-   over the `PyInt` brand, whose head type `omega` refuses to look through;
+   over the `PyInt` brand, whose head type `omega` refuses to look through
+   (the same brand-blindness you met in “Floor means floor”);
    `grind` matches up to reducible unfolding and closes all four cases.
 
 You can chain the case splits with `<;>` (“then, on every goal produced…”)
@@ -70,5 +71,5 @@ facts, symbolic runs, the sweep — was a *procedure*. And procedures can be
 mechanized. Next level, the machine rises.
 "
 
-NewTactic refine py_simp by_cases grind omega
+NewTactic refine py_simp by_cases
 NewDefinition ag_clamp01 LeanModels.Python.callFunction

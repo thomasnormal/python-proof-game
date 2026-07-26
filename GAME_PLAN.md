@@ -8,10 +8,14 @@ against CPython, typed spec surface: `f(a) ==> v`, `py_prove`, `py_loop`, …).
 
 ## Status
 
-- **Built and green**: Worlds 1–3 (16 levels: 4 + 6 + 6), full `lake build`
+- **Built and green**: Worlds 1–3 (18 levels: 4 + 8 + 6), full `lake build`
   including `MakeGame`; gamedata generated at `.lake/gamedata/`. World 2
-  gained the `py_vcgen` coda (L6 "The machine rises"); World 3 ("Loop
-  World") is built on `py_vcgen` clause + delayed-goal modes.
+  gained the `py_vcgen` coda ("The machine rises") and, in the post-playtest
+  redesign, the **floor arc** (L2–L4: name it / prove it / spend it — the
+  one-tactic `midpoint_spec` level is now the *setup* of a three-level
+  mini-arc in which the player proves `//` is floor division and that
+  Python and C disagree); World 3 ("Loop World") is built on `py_vcgen`
+  clause + delayed-goal modes.
 - **Designed, not built**: World 4 (RSA World, below) — next up.
 
 ## Toolchain findings (the critical reconciliation)
@@ -78,16 +82,20 @@ Symbolic inputs, loop-free bodies.
 | # | Level | Statement | Proof | Introduces |
 |---|---|---|---|---|
 | 1 | add, for all | `add_total : add(a, b) ==> a + b` | `py_prove [add]` | player-driven symbolic execution |
-| 2 | Say floor when you mean floor | `midpoint_spec : midpoint(a, b) ==> Int.fdiv (a + b) 2` | `py_prove [midpoint]` | the honest `Int.fdiv` statement discipline; named statement enters inventory |
-| 3 | Preconditions are hypotheses | `midpoint_nonneg (ha : 0 ≤ a) (hb : 0 ≤ b) : midpoint(a, b) ==> (a + b) / 2` | `py_corollary [midpoint_spec, Int.fdiv_eq_ediv_of_nonneg]` | preconditions-as-hypotheses, `py_corollary`, value bridging without re-execution |
-| 4 | Fork in the road | `my_abs_spec : my_abs(x) ==> \|x\|` | `py_prove [my_abs]` | branching bodies; `py_prove`'s single-`split` recipe |
-| 5 | **Boss: clamp01** | `clamp01_total : ag_clamp01.clamp01(x) ==> max 0 (min 1 x)` | `refine ⟨32, ?_⟩; by_cases h1 : x < 0 <;> by_cases h2 : 1 < x <;> py_simp [callFunction, ag_clamp01, h1, h2] <;> grind` | the documented boundary of `py_prove` (two sequential `if`s); `refine` (hand the fuel yourself — the move `py_check`/`py_prove` make internally), `py_simp`, `by_cases`, `grind`, `omega` (and why `omega` fails on `PyInt`-branded comparisons) |
-| 6 | **Coda: the machine rises** | `clamp01_machine : ag_clamp01.clamp01(x) ==> min 1 (max 0 x)` | `py_vcgen [ag_clamp01]` + `all_goals omega` | `py_vcgen` (the VC walker: the whole L5 fight, generated), `all_goals`; the payoff framing — and the observation that the walker needs **no fuel**, which is why it survives loops |
+| 2 | Say floor when you mean floor | `midpoint_spec : midpoint(a, b) ==> Int.fdiv (a + b) 2` | `py_prove [midpoint]` | the honest `Int.fdiv` statement discipline; named statement enters inventory. Reframed as **step 1 of the floor arc**: *name* the function the program computes |
+| 3 | **Floor means floor** (arc step 2) | `floordiv_is_floor (a b q : PyInt) (hb : 0 < b) (hq : arith.floordiv(a, b) ⇓ q) : b * q ≤ a ∧ a < b * (q + 1)` | `have hb' : b ≠ 0 := by grind` → `have hrun : … ==> Int.fdiv a b := by py_prove [arith, hb']` → `have hqe := CallsTo.typed_int_eq hq hrun` → stage `Int.fmod_add_fdiv_mul` + `Int.fmod_nonneg_of_pos` + `Int.fmod_lt_of_pos` → `grind` | the `⇓` result-binding hypothesis (`ResultArrow` doc tile), determinism as a *player move* (`CallsTo.typed_int_eq`), the division-algorithm toolkit, `have`, `grind` (and both reasons `omega` can't: `PyInt` brand + the nonlinear `b * q`) |
+| 4 | **Python is not C** (arc step 3) | `python_is_not_C : ¬ (arith.floordiv(-7, 2) ==> -3)` | `intro h` → `have hrun : … ==> -4 := by py_check` → `have h34 := CallsTo.typed_int_eq h hrun` → `omega` | negation-as-implication (`intro`), refutation via determinism (a run fact rules out every *other* value), `omega` on its home turf (`-3 = -4` at honest `Int`) |
+| 5 | Preconditions are hypotheses | `midpoint_nonneg (ha : 0 ≤ a) (hb : 0 ≤ b) : midpoint(a, b) ==> (a + b) / 2` | `py_corollary [midpoint_spec, Int.fdiv_eq_ediv_of_nonneg]` | preconditions-as-hypotheses, `py_corollary`, value bridging without re-execution |
+| 6 | Fork in the road | `my_abs_spec : my_abs(x) ==> \|x\|` | `py_prove [my_abs]` | branching bodies; `py_prove`'s single-`split` recipe |
+| 7 | **Boss: clamp01** | `clamp01_total : ag_clamp01.clamp01(x) ==> max 0 (min 1 x)` | `refine ⟨32, ?_⟩; by_cases h1 : x < 0 <;> by_cases h2 : 1 < x <;> py_simp [callFunction, ag_clamp01, h1, h2] <;> grind` | the documented boundary of `py_prove` (two sequential `if`s); `refine` (hand the fuel yourself — the move `py_check`/`py_prove` make internally), `py_simp`, `by_cases` (`grind`/`omega` now arrive earlier, in the floor arc) |
+| 8 | **Coda: the machine rises** | `clamp01_machine : ag_clamp01.clamp01(x) ==> min 1 (max 0 x)` | `py_vcgen [ag_clamp01]` + `all_goals omega` | `py_vcgen` (the VC walker: the whole boss fight, generated), `all_goals`; the payoff framing — and the observation that the walker needs **no fuel**, which is why it survives loops |
 
 (Verified during design: `py_prove [ag_clamp01]` genuinely fails on the boss —
 the level teaches a real boundary, not a staged one. The coda states the
 clamp with `min`/`max` nested the *other* way so its statement isn't literally
-L5's.)
+the boss's. Verified for the floor arc: `grind` alone — without the three
+staged division-algorithm facts — does NOT close `floordiv_is_floor`, and
+`py_prove` alone cannot either; the level's content is real.)
 
 ### World 3 — Loop World (built)
 
@@ -227,6 +235,61 @@ Things worth knowing when extending the game:
 14. **`lake update` now runs mathlib's `cache get` post-update hook**
     (~30–60 min on a cold network) even though the game never builds
     mathlib. Harmless, but budget for it when bumping the pin.
+15. **`omega` does not know `Int.fdiv`/`Int.fmod`** — not even with literal
+    divisors (`Int.fdiv a 2` is an opaque atom to it). It atomizes what it
+    doesn't understand, but without commutativity: `a.fdiv b * b` and
+    `b * a.fdiv b` are *different* atoms, so even the division-algorithm
+    hypotheses don't rescue it when the goal is oriented the other way. And
+    a product of two variables (`b * q`) is outside its language entirely.
+    v4.33 `grind` (cutsat + ring) closes the floor characterization from
+    `Int.fmod_add_fdiv_mul` + the two `fmod` range facts — but NOT without
+    them (verified: bare `grind` fails on `floordiv_is_floor` even though
+    its normalizer internally relates `fdiv` to `ediv`).
+16. **The `PyInt` brand blinds `omega` to *goals*, not just `by_cases`
+    hypotheses** (extends friction 1/№ 9 of the boss design): `b ≠ 0` with
+    `b : PyInt` is invisible even when every hypothesis is Int-headed, and
+    rebranding hypotheses does not help when the *goal* is branded — even
+    `(0 : PyInt) < 10` defeats it. `grind` is the standard discharge for
+    brand-headed side goals (`have hb' : b ≠ 0 := by grind`).
+17. **Core v4.33 names for the division algorithm**: there is no
+    `Int.fmod_add_fdiv` — the reassembly lemma is `Int.fmod_add_fdiv_mul`
+    (`a.fmod b + a.fdiv b * b = a`); the dividend-sign-free remainder bound
+    is `Int.fmod_nonneg_of_pos` (`Int.fmod_nonneg` needs both operands
+    nonnegative).
+18. **Introduce-once discipline for shared atoms.** Moving `have`, `grind`,
+    `omega`, and `Int.fmod_lt_of_pos` into the floor arc (SLW L3/L4) meant
+    *removing* them from the later levels that used to introduce them
+    (Clamp01 boss, LoopWorld gcd) — each atom is registered by exactly one
+    `New*` command, at first use. Also: `DefinitionDoc` names need not
+    resolve to declarations, which is how the `⇓` hypothesis form gets its
+    own inventory tile (`DefinitionDoc ResultArrow as "⇓"`).
+19. **Staged hints in a fixed-goal proof need `(strict := true)`.** GameServer
+    hints match hypotheses as well as the goal, but non-strict hints fire in
+    any context that *contains* the hint's context — in a `have`-staged proof
+    whose goal never changes, every earlier hint would stack up at every
+    later step. Strict hints pin each message to exactly its stage.
+
+## One-tactic levels audit
+
+Deliverable for the post-playtest fix wave: every level whose *intended*
+solution is exactly one tactic call, each with a one-line "use it" follow-up
+suggestion (the floor arc is the template: a one-shot spec level becomes the
+*setup* for levels that USE the proved theorem).
+
+| Level | One-tactic solution | "Use it" follow-up suggestion |
+|---|---|---|
+| W1L1 Run it (`tri(4) ==> 10`) | `py_check` | Refute a wrong value from the run: `¬ (tri(4) ==> 11)` via `CallsTo.typed_int_eq` — a concrete preview of the determinism move the floor arc now teaches. |
+| W1L2 The floor is not the ceiling (`midpoint(3, -4) ==> -1`) | `py_check` | Partially addressed by the new W2L4 (same C-vs-Python sting on `floordiv`); a direct sequel could ask `¬ (midpoint(3, -4) ==> 0)` — refute the truncation guess you were warned about. |
+| W1L3 It crashes. Prove it. (`arith.mod(7, 0) ==>! .zeroDivisionError`) | `py_check` | Use the crash: from `==>!` conclude `¬ (arith.mod(7, 0) ==> v)` for any `v` via `CallsTo.not_raises` — "a raise excludes every return value". |
+| W1L4 The bridge (`floordiv_zero`) | `py_prove [arith]` (given as Template) | Spend the ∀: instantiate `floordiv_zero` at `10^100` where `py_check`-style evaluation is hopeless — `exact floordiv_zero (10^100)` teaches theorem-application-beats-re-execution. |
+| W2L1 add, for all (`add_total`) | `py_prove [add]` | Derive `add(a, a) ==> 2 * a` by `py_corollary [add_total]` value-rewriting — first taste of use-don't-rerun *before* the midpoint corollary level. |
+| W2L2 Say floor… (`midpoint_spec`) | `py_prove [midpoint]` | **Resolved by this redesign**: now step 1 of the floor arc; its name is spent by W2L5 (`py_corollary`) and its discipline by W2L3/W2L4. |
+| W2L5 Preconditions are hypotheses (`midpoint_nonneg`) | `py_corollary [midpoint_spec, Int.fdiv_eq_ediv_of_nonneg]` | Use the corollary on a concrete pair without running: `midpoint(6, 8) ==> 7` by `py_corollary [midpoint_nonneg]` — the pretty form pays out numbers. |
+| W2L6 Fork in the road (`my_abs_spec`) | `py_prove [my_abs]` | Relational use: `my_abs(x) ⇓ r → 0 ≤ r` via `CallsTo.typed_int_eq` + `omega` — reuses the arc's `⇓` machinery on a branching program. |
+
+Not listed: W2L8 (coda) and LoopWorld L3 are two calls (`py_vcgen` + a
+sweep), and the invented invariant is real content; everything else is
+multi-step.
 
 ## Publication checklist (per lean4game docs)
 

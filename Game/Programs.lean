@@ -45,6 +45,10 @@ load_program nested_flow from "GameAssets/envelopes/nested_flow.json"
 #py_check midpoint(3, -4) = -1
 #py_check my_abs(-5) = 5
 #py_check arith.mod(7, 0) raises .zeroDivisionError
+-- The floor arc's C-vs-Python pair (cited by StraightLineWorld L3/L4):
+-- truncation would give -7 // 2 = -3; Python floors to -4.
+#py_check arith.floordiv(7, 2) = 3
+#py_check arith.floordiv(-7, 2) = -4
 #py_check ag_clamp01.clamp01(7) = 1
 #py_check sum_to(10) = 55
 #py_check odd_sum(7) = 49

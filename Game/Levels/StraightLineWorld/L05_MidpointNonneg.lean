@@ -1,9 +1,9 @@
-import Game.Levels.StraightLineWorld.L02_MidpointSpec
+import Game.Levels.StraightLineWorld.L04_PythonIsNotC
 
 open LeanModels LeanModels.Python
 
 World "StraightLineWorld"
-Level 3
+Level 5
 
 Title "Preconditions are hypotheses"
 

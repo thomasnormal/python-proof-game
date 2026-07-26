@@ -1,9 +1,9 @@
-import Game.Levels.StraightLineWorld.L03_MidpointNonneg
+import Game.Levels.StraightLineWorld.L05_MidpointNonneg
 
 open LeanModels LeanModels.Python
 
 World "StraightLineWorld"
-Level 4
+Level 6
 
 Title "Fork in the road"
 

@@ -1,9 +1,9 @@
-import Game.Levels.StraightLineWorld.L05_Clamp01Boss
+import Game.Levels.StraightLineWorld.L07_Clamp01Boss
 
 open LeanModels LeanModels.Python
 
 World "StraightLineWorld"
-Level 6
+Level 8
 
 Title "The machine rises"
 

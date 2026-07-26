@@ -29,9 +29,9 @@ Euclid's**: the pair `(a, b)` changes every lap, but its gcd never does —
 
 with measure `b.toNat` (the remainder strictly shrinks). The residuals this
 time are *number theory*, and `grind` alone won't carry them — you'll close
-them one by one with the spec-side library (fresh in your inventory, all
-stated over `Int.fmod`, because Python's `%` *is* `Int.fmod`). In walk
-order, with `·` focusing each goal:
+them one by one with the spec-side library (part fresh in your inventory,
+part carried since “Floor means floor”, all stated over `Int.fmod`, because
+Python's `%` *is* `Int.fmod`). In walk order, with `·` focusing each goal:
 
 1. **exit** — package the answer at `b = 0`: witness the final `a`, then
    `Int.gcd a 0 = a.natAbs` closes it. Given below — read it, it's the
@@ -84,7 +84,7 @@ programming language that ships on a billion machines.
 One level left. Bring everything.
 "
 
-NewTactic rw «have»
-NewTheorem LeanModels.Python.gcd_fmod_step Int.fmod_nonneg Int.fmod_lt_of_pos
+NewTactic rw
+NewTheorem LeanModels.Python.gcd_fmod_step Int.fmod_nonneg
   Int.gcd_zero_right Int.natAbs_of_nonneg
 NewDefinition gcd Int.gcd

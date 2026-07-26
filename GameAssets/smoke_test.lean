@@ -44,19 +44,49 @@ example (a : PyInt) : arith.floordiv(a, 0) ==>! .zeroDivisionError := by
 -- W2L1: add
 example (a b : PyInt) : add(a, b) ==> a + b := by py_prove [add]
 
--- W2L2: midpoint, honest fdiv
+-- W2L2: midpoint, honest fdiv (step 1 of the floor arc: name the function)
 theorem midpoint_spec (a b : PyInt) : midpoint(a, b) ==> Int.fdiv (a + b) 2 := by
   py_prove [midpoint]
 
--- W2L3: precondition level via py_corollary
+-- The floor arc's non-vacuity pair, as the level texts cite them
+#py_check arith.floordiv(7, 2) = 3
+#py_check arith.floordiv(-7, 2) = -4
+
+-- W2L3 "Floor means floor" (step 2): the ⇓ hypothesis + determinism
+-- (CallsTo.typed_int_eq) pin q, then the division algorithm + grind.
+-- NOTE toolkit findings: omega does NOT know Int.fdiv (opaque atom), cannot
+-- multiply two variables (b * q), and skips PyInt-branded goals — grind
+-- handles all three. Core v4.33 names: Int.fmod_add_fdiv_mul (there is no
+-- Int.fmod_add_fdiv), Int.fmod_nonneg_of_pos, Int.fmod_lt_of_pos.
+theorem floordiv_is_floor (a b q : PyInt) (hb : 0 < b)
+    (hq : arith.floordiv(a, b) ⇓ q) :
+    b * q ≤ a ∧ a < b * (q + 1) := by
+  have hb' : b ≠ 0 := by grind
+  have hrun : arith.floordiv(a, b) ==> Int.fdiv a b := by py_prove [arith, hb']
+  have hqe : q = Int.fdiv a b := CallsTo.typed_int_eq hq hrun
+  have hkey := Int.fmod_add_fdiv_mul a b
+  have h0 : 0 ≤ Int.fmod a b := Int.fmod_nonneg_of_pos a hb
+  have h1 : Int.fmod a b < b := Int.fmod_lt_of_pos a hb
+  grind
+
+-- W2L4 "Python is not C" (step 3): the concrete run + determinism refute
+-- C's truncating answer; the forced equation -3 = -4 is Int-headed, so
+-- omega finishes on its home turf.
+theorem python_is_not_C : ¬ (arith.floordiv(-7, 2) ==> -3) := by
+  intro h
+  have hrun : arith.floordiv(-7, 2) ==> -4 := by py_check
+  have h34 := CallsTo.typed_int_eq h hrun
+  omega
+
+-- W2L5: precondition level via py_corollary
 set_option linter.unusedVariables false in
 example (a b : PyInt) (ha : 0 ≤ a) (hb : 0 ≤ b) : midpoint(a, b) ==> (a + b) / 2 := by
   py_corollary [midpoint_spec, Int.fdiv_eq_ediv_of_nonneg]
 
--- W2L4: branching
+-- W2L6: branching
 example (x : PyInt) : my_abs(x) ==> |x| := by py_prove [my_abs]
 
--- W2L5 (boss): two sequential ifs, outside py_prove's recipe
+-- W2L7 (boss): two sequential ifs, outside py_prove's recipe
 example (x : PyInt) : ag_clamp01.clamp01(x) ==> max 0 (min 1 x) := by
   refine ⟨32, ?_⟩
   by_cases h1 : x < 0 <;> by_cases h2 : 1 < x <;>
@@ -67,7 +97,7 @@ example (x : PyInt) : ag_clamp01.clamp01(x) ==> max 0 (min 1 x) := by
 -- example (x : PyInt) : ag_clamp01.clamp01(x) ==> max 0 (min 1 x) := by
 --   py_prove [ag_clamp01]
 
--- W2L6 (coda): the same boss shape, generated — one py_vcgen call + sweep
+-- W2L8 (coda): the same boss shape, generated — one py_vcgen call + sweep
 example (x : PyInt) : ag_clamp01.clamp01(x) ==> min 1 (max 0 x) := by
   py_vcgen [ag_clamp01]
   all_goals omega

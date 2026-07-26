@@ -21,18 +21,27 @@ Python's `//` **floors**.
 
 Lean has a whole zoo of integer divisions: `Int.div` truncates toward zero,
 `/` is Euclidean division, and `Int.fdiv` floors. Only one of them is what
-`//` means, and the goal says it out loud: `Int.fdiv (a + b) 2`.
+`//` means, and the goal says it out loud: `Int.fdiv (a + b) 2`. That's the
+framework's honesty policy: the divergence between `//` and “the division
+you assumed” belongs **in the statement**, never buried in a translation.
 
-This is the framework's honesty policy: the divergence between `//` and “the
-division you assumed” belongs **in the statement**, never buried in a
-translation.
+This level opens a three-level arc about that one symbol:
+
+* **Step 1 (here): name it.** One `py_prove` call pins what `midpoint`
+  computes — for every input at once — to the name `Int.fdiv`.
+* **Step 2: earn the name.** “Floor” is a *property*, not a label. Next
+  level you prove the returned quotient really is the floor, from the
+  division algorithm up.
+* **Step 3: spend it.** Then you prove that Python and C *disagree* about
+  `-7 // 2` — as a theorem.
 
 The body is one line — `py_prove` territory.
 "
 
 /-- `midpoint(a, b) ==> Int.fdiv (a + b) 2` for all integers — *floor*
-division, which is what Python's `//` means. The next level derives its
-pretty `/` corollary via `py_corollary`. -/
+division, which is what Python's `//` means. Step 1 of the floor arc: the
+program's behavior, pinned to a name. A later level derives its pretty `/`
+corollary via `py_corollary`. -/
 TheoremDoc midpoint_spec as "midpoint_spec" in "Python programs"
 
 /-- For all integers `a` and `b`, running `midpoint` terminates and returns
@@ -44,8 +53,13 @@ Statement midpoint_spec (a b : PyInt) : midpoint(a, b) ==> Int.fdiv (a + b) 2 :=
   py_prove [midpoint]
 
 Conclusion "
-Proved — and *named*. `midpoint_spec` is now in your inventory, and the next
-level shows why that matters: good theorems get reused, not re-proved.
+Proved — and *named*. `midpoint_spec` is now in your inventory, and named
+theorems get reused, not re-proved.
+
+But be honest about what you hold: the statement pins `midpoint` to a Lean
+constant *called* `Int.fdiv`, and “floor division” is, so far, that
+constant's name. A skeptic may ask: who says `Int.fdiv` floors? Next level
+you answer with mathematics instead of a name.
 "
 
 NewDefinition Int.fdiv
