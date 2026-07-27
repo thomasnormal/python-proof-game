@@ -17,7 +17,11 @@ theorem you just bled for — should pay this out *without running anything*.
 
 That's the whole point of a named theorem: prove once, spend forever.
 `Int.gcd_comm` (new in your inventory) is the algebra; `py_corollary` is
-the cashier; `gcd_total` is the account.
+the cashier; `gcd_total` is the account. One warning about the order of
+business: **rewrite first, then collect** — `rw [Int.gcd_comm]` to turn the
+goal into `gcd_total`'s exact shape, *then* `py_corollary [gcd_total]`.
+(Handing both to `py_corollary` at once fails: it cannot reorient a
+permutative rewrite underneath the spec's binders.)
 "
 
 /-- `gcd(A, B) ==> Int.gcd B A` for all `A, B ≥ 0` — the arguments'

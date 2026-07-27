@@ -31,7 +31,9 @@ The battle plan: **name the value** (prove the run fact
 `… ==> Int.fdiv a b`, handing `py_prove` the divisor guard `b ≠ 0`), **pin
 `q`** (determinism welds `hq` to the run fact), **open the box** (stage the
 three division-algorithm facts with **`have`**, then **`grind`** — not
-`omega`: `b * q` is nonlinear and the binders wear the `PyInt` brand). The
+`omega`: `b * q` is nonlinear and the binders wear the `PyInt` brand.
+That goes for the little helper fact too: prove `b ≠ 0` with `by grind`,
+not `by omega`). The
 hints stage every move.
 "
 

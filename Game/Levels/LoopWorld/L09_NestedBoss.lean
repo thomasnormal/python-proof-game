@@ -8,7 +8,10 @@ Level 9
 Title "Boss: the nested machine"
 
 Introduction "
-The final boss — the **toughest fight in the game**. Three shapes at once:
+The final boss — the **toughest fight in the game**. (One veteran's tip
+before you charge: the residuals here wear the `PyInt` brand — same as the
+Straight-Line boss — so when a goal resists, prefer `grind` over `omega`.)
+Three shapes at once:
 
 ```python
 def first_factor(n: int) -> int:

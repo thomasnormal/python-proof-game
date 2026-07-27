@@ -23,7 +23,9 @@ This loop counts **down** by mutating its own argument — a naming problem
 your invariant has to survive.
 
 Clause binders must be the Python names of the variables *assigned in the
-loop body* — here `s` and `n`. So inside your clauses, `n` necessarily
+loop body* — here `s` and `n`, **matched by name, in any order** (write
+`fun (s n : Int)` or `fun (n s : Int)`; what matters is the names, not the
+positions). So inside your clauses, `n` necessarily
 means the **current, shrinking** value. But the theorem is about the value
 `n` *started* as — and that name is already taken!
 

@@ -142,7 +142,11 @@ comparison — a fact stated over the `PyInt` brand is invisible to it (use
 doesn't understand — `Int.fdiv a b` is an opaque symbol to it, and `b * q`
 with both sides variables is out of its (linear) language. Inside its
 language, though, it is a decision procedure: it *will* finish, e.g. by
-refuting `-3 = -4`. -/
+refuting `-3 = -4`. **Trap to know**: on a branded goal, `omega` may print a
+plausible-looking counterexample that seems to contradict a hypothesis
+sitting right in your context — it is not lying, it just *cannot see* the
+branded hypothesis. If the counterexample looks impossible, reach for
+`grind`. -/
 TacticDoc omega
 
 /-- `py_vcgen [prog]` is the **VC-generating walker** — the whole manual
