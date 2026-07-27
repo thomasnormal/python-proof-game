@@ -36,18 +36,16 @@ TheoremDoc my_abs_spec as "my_abs_spec" in "Python programs"
 /-- For every integer `x`, running `my_abs` terminates and returns the
 absolute value `|x|`. -/
 Statement my_abs_spec (x : PyInt) : my_abs(x) ==> |x| := by
-  Hint "Branching bodies are still `py_prove` territory: `py_prove [my_abs]`.
-  It executes symbolically, `split`s the surviving `if`, and closes both
-  branches with `omega`."
+  Hint "Branching bodies are still `py_prove` territory — one call, program
+  in brackets. It executes symbolically, `split`s the surviving `if`, and
+  closes both branches with `omega`."
+  Hint (hidden := true) "`py_prove [my_abs]`."
   py_prove [my_abs]
 
 Conclusion "
 Two branches, one call. `py_prove`'s recipe: execute, `split` the surviving
 `if`, `omega` both sides.
 
-The fine print: that recipe performs **one** split. A body with *two
-sequential* `if`s leaves a shape it cannot attack. Guess what the next level
-is.
+The recipe holds for any *lone* `if` — your inventory has one more of those
+waiting. After that, the fine print about the word *lone* comes due.
 "
-
-NewDefinition my_abs

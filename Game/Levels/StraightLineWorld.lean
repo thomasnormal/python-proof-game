@@ -4,8 +4,9 @@ import Game.Levels.StraightLineWorld.L03_FloorMeansFloor
 import Game.Levels.StraightLineWorld.L04_PythonIsNotC
 import Game.Levels.StraightLineWorld.L05_MidpointDiv
 import Game.Levels.StraightLineWorld.L06_MyAbs
-import Game.Levels.StraightLineWorld.L07_Clamp01Boss
-import Game.Levels.StraightLineWorld.L08_MachineRises
+import Game.Levels.StraightLineWorld.L07_MyMax
+import Game.Levels.StraightLineWorld.L08_Clamp01Boss
+import Game.Levels.StraightLineWorld.L09_MachineRises
 
 World "StraightLineWorld"
 Title "Straight-Line World"

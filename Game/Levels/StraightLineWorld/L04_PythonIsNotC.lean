@@ -8,34 +8,28 @@ Level 4
 Title "Python is not C"
 
 Introduction "
-Ask C what `-7 / 2` is and it answers `-3`: C truncates integer division
-toward zero — as do Java, Rust, and Go. Ask Python what `-7 // 2` is and it
-answers `-4`: Python floors, toward minus infinity. Same digits, different
-languages, different integer.
+Ask C what `-7 / 2` is and it answers `-3`: C truncates toward zero — as do
+Java, Rust, and Go. Ask Python what `-7 // 2` is and it answers `-4`:
+Python floors. Same digits, different languages, different integer.
 
-You proved *floor* is a property last level. Step 3 of the arc is the
-cash-out: prove the C answer **impossible**. The goal is a negation —
+Step 3 of the arc is the cash-out: prove the C answer **impossible**. The
+goal is a negation —
 
 `¬ (arith.floordiv(-7, 2) ==> -3)`
 
-— and in Lean, `¬ P` *is* the implication `P → False`. So the proof opens by
-**assuming** the C-flavored claim: the new tactic `intro h` moves it into
-your context as `h`, leaving `False` to prove.
+— and in Lean, `¬ P` *is* the implication `P → False`. So the proof opens
+by **assuming** the C-flavored claim: the new tactic `intro h` moves it into
+your context, leaving `False` to prove.
 
-From there, one tool you own, one old friend, one newcomer:
+From there: `py_check` proves what the run *actually* returns, determinism
+confronts `h` with that run — one call, two alleged values, so `-3 = -4` —
+and the newcomer **`omega`**, core Lean's decision procedure for linear
+integer arithmetic, refutes it. (Last level `omega` was the wrong tool; a
+false equation of `Int` literals is its home turf, and there it never
+misses.)
 
-* `py_check` proves what the run *actually* returns — the build has checked
-  the concrete fact `arith.floordiv(-7, 2) = -4` since forever;
-* determinism (`CallsTo.typed_int_eq`) confronts `h` with that run: one
-  call, two alleged return values, therefore `-3 = -4`;
-* and **`omega`** — core Lean's decision procedure for linear integer
-  arithmetic — is delighted to refute `-3 = -4`. (Last level `omega` was the
-  wrong tool; here the forced equation lives at honest `Int`, no `PyInt`
-  brand, no products of variables — this is its home turf, and on it,
-  `omega` never misses.)
-
-No compiler flag, no folklore, no blog post: a machine-checked proof that
-two programming languages disagree about one expression.
+No compiler flag, no folklore: a machine-checked proof that two programming
+languages disagree about one expression.
 "
 
 /-- `arith.floordiv(-7, 2)` cannot return `-3`, the answer C's truncating
@@ -55,24 +49,22 @@ Statement python_is_not_C : ¬ (arith.floordiv(-7, 2) ==> -3) := by
   `have hrun : arith.floordiv(-7, 2) ==> -4 := by py_check`
   — a concrete run, so `py_check` executes it in-kernel."
   have hrun : arith.floordiv(-7, 2) ==> -4 := by py_check
-  Hint (strict := true) "One call, two alleged return values. Determinism
-  collapses them: `have h34 := CallsTo.typed_int_eq h hrun` — read the type
-  it infers: `h34 : -3 = -4`."
+  Hint (strict := true) (hidden := true) "One call, two alleged return
+  values. Determinism collapses them:
+  `have h34 := CallsTo.typed_int_eq h hrun` — read the type it infers:
+  `h34 : -3 = -4`."
   have h34 := CallsTo.typed_int_eq h hrun
-  Hint (strict := true) "A false equation between integer literals, at
-  honest `Int`. `omega` finishes."
+  Hint (strict := true) (hidden := true) "A false equation between integer
+  literals, at honest `Int`. `omega` finishes."
   omega
 
 Conclusion "
 `-3 = -4` — absurd, C refuted, arc closed: **named** (`midpoint_spec`),
 **proved** (`floordiv_is_floor`), **spent** (`python_is_not_C`).
 
-Notice which ingredient carried the weight: **determinism**. Testing can
-show what a run returned; it can never show what a run *cannot* return. One
-observed run plus `CallsTo.typed_int_eq` upgrades a data point into an
-impossibility theorem. So when a hasty port of Python code to C silently
-turns `-7 // 2 == -4` into `-7 / 2 == -3`, that is not a folklore gotcha —
-it is the negation of a theorem you have proved.
+The load-bearing ingredient was **determinism**: testing can show what a
+run returned, never what a run *cannot* return. One observed run plus
+`CallsTo.typed_int_eq` upgrades a data point into an impossibility theorem.
 
 Back to the regular program: cashing proved runs into prettier statements.
 "

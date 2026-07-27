@@ -53,7 +53,10 @@ theorem.
 
 Of course, `tri(4) ==> 10` is one test case wearing a fancy hat. The rest of
 this game is about earning the un-fancy hats: `tri(n)` for *every* `n`.
+
+A second program, `midpoint`, just landed in your inventory. It's next — and
+it's a trap.
 "
 
 NewTactic py_check
-NewDefinition LeanModels.Python.CallsTo tri
+NewDefinition LeanModels.Python.CallsTo tri midpoint

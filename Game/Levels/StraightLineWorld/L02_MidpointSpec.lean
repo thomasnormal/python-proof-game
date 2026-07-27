@@ -16,24 +16,22 @@ def midpoint(a: int, b: int) -> int:
 ```
 
 What does `midpoint` return *in general*? “`(a + b) / 2`, obviously” — but
-Machine World already caught you once: `midpoint(3, -4)` is `-1`, not `0`.
-Python's `//` **floors**.
+Machine World caught you twice: `//` **floors**.
 
-Lean has a whole zoo of integer divisions: `Int.div` truncates toward zero,
-`/` is Euclidean division, and `Int.fdiv` floors. Only one of them is what
-`//` means, and the goal says it out loud: `Int.fdiv (a + b) 2`. That's the
-framework's honesty policy: the divergence between `//` and “the division
-you assumed” belongs **in the statement**, never buried in a translation.
+Lean has a zoo of integer divisions (`Int.div` truncates, `/` is Euclidean,
+`Int.fdiv` floors — details on the new `Int.fdiv` inventory tile). Only one
+is what `//` means, and the goal says it out loud: `Int.fdiv (a + b) 2`.
+That's the honesty policy: the divergence between `//` and “the division you
+assumed” belongs **in the statement**, never buried in a translation.
 
 This level opens a three-level arc about that one symbol:
 
 * **Step 1 (here): name it.** One `py_prove` call pins what `midpoint`
-  computes — for every input at once — to the name `Int.fdiv`.
-* **Step 2: earn the name.** “Floor” is a *property*, not a label. Next
-  level you prove the returned quotient really is the floor, from the
-  division algorithm up.
-* **Step 3: spend it.** Then you prove that Python and C *disagree* about
-  `-7 // 2` — as a theorem.
+  computes to the name `Int.fdiv`.
+* **Step 2: earn the name.** “Floor” is a *property*, not a label — prove
+  the quotient really is the floor, from the division algorithm up.
+* **Step 3: spend it.** Prove that Python and C *disagree* about `-7 // 2`
+  — as a theorem.
 
 The body is one line — `py_prove` territory.
 "

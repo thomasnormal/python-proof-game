@@ -32,19 +32,28 @@ load_program tri from "GameAssets/envelopes/tri.json"
 load_program add from "GameAssets/envelopes/add.json"
 load_program midpoint from "GameAssets/envelopes/midpoint.json"
 load_program my_abs from "GameAssets/envelopes/my_abs.json"
+load_program my_max from "GameAssets/envelopes/my_max.json"
 load_program arith from "GameAssets/envelopes/arith.json"
 load_program ag_clamp01 from "GameAssets/envelopes/ag_clamp01.json"
 -- World 3 ("Loop World"):
 load_program sum_to from "GameAssets/envelopes/sum_to.json"
 load_program odd_sum from "GameAssets/envelopes/odd_sum.json"
+load_program double_sum from "GameAssets/envelopes/double_sum.json"
+load_program steps from "GameAssets/envelopes/steps.json"
 load_program gcd from "GameAssets/envelopes/gcd.json"
 load_program nested_flow from "GameAssets/envelopes/nested_flow.json"
 
 #py_check tri(4) = 10
 #py_check add(2, 3) = 5
 #py_check midpoint(3, -4) = -1
+-- The wave-2 floor rep (MachineWorld L3): floor on double negatives.
+#py_check midpoint(-3, -4) = -4
 #py_check my_abs(-5) = 5
+#py_check my_max(3, 5) = 5
+#py_check my_max(5, 3) = 5
 #py_check arith.mod(7, 0) raises .zeroDivisionError
+-- The wave-2 crash rep (MachineWorld L5): the sibling crashes too.
+#py_check arith.floordiv(-3, 0) raises .zeroDivisionError
 -- The floor arc's C-vs-Python pair (cited by StraightLineWorld L3/L4):
 -- truncation would give -7 // 2 = -3; Python floors to -4.
 #py_check arith.floordiv(7, 2) = 3
@@ -52,6 +61,10 @@ load_program nested_flow from "GameAssets/envelopes/nested_flow.json"
 #py_check ag_clamp01.clamp01(7) = 1
 #py_check sum_to(10) = 55
 #py_check odd_sum(7) = 49
+#py_check double_sum(4) = 12
+#py_check steps(-3) = 3
+#py_check steps(5) = 5
+#py_check steps(0) = 0
 #py_check gcd(12, 18) = 6
 #py_check nested_flow.first_factor(12) = 2
 #py_check nested_flow.first_factor(13) = 13

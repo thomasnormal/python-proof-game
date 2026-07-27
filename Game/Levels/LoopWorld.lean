@@ -1,9 +1,12 @@
 import Game.Levels.LoopWorld.L01_ReadTheProof
 import Game.Levels.LoopWorld.L02_InventInvariant
-import Game.Levels.LoopWorld.L03_OddSum
-import Game.Levels.LoopWorld.L04_SumTo
-import Game.Levels.LoopWorld.L05_Gcd
-import Game.Levels.LoopWorld.L06_NestedBoss
+import Game.Levels.LoopWorld.L03_DoubleSum
+import Game.Levels.LoopWorld.L04_OddSum
+import Game.Levels.LoopWorld.L05_SumTo
+import Game.Levels.LoopWorld.L06_Steps
+import Game.Levels.LoopWorld.L07_Gcd
+import Game.Levels.LoopWorld.L08_GcdComm
+import Game.Levels.LoopWorld.L09_NestedBoss
 
 World "LoopWorld"
 Title "Loop World"
@@ -20,8 +23,9 @@ tactic can invent. Everything else — walking the code, splicing the symbolic
 runs, forking the branches — is `py_vcgen`'s job, and what it leaves you is
 pure mathematics, tagged by role: `init`, `preserve`, `dec`, `ret`.
 
-You'll read one loop proof, then invent your own invariants: for a square,
-for a countdown that shadows its own argument, for Euclid — and for the
-boss, a nested loop with a `break`, where you'll state what's true at the
-moment of escape.
+You'll read one loop proof, then invent your own invariants — for a double
+sum, for a square, for a countdown that shadows its own argument, for a
+walk with a branch in its body, for Euclid — cash a corollary out of the
+gcd theorem you bled for, and face the boss: a nested loop with a `break`,
+where you'll state what's true at the moment of escape.
 "

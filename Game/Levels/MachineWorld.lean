@@ -1,7 +1,9 @@
 import Game.Levels.MachineWorld.L01_TriRun
 import Game.Levels.MachineWorld.L02_FloorRun
-import Game.Levels.MachineWorld.L03_ModRaise
-import Game.Levels.MachineWorld.L04_SymbolicBridge
+import Game.Levels.MachineWorld.L03_FloorEncore
+import Game.Levels.MachineWorld.L04_ModRaise
+import Game.Levels.MachineWorld.L05_CrashEncore
+import Game.Levels.MachineWorld.L06_SymbolicBridge
 
 World "MachineWorld"
 Title "Machine World"

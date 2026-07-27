@@ -327,6 +327,19 @@ def my_abs(x: int) -> int:
 -/
 DefinitionDoc my_abs as "my_abs" in "Python programs"
 
+/-- The loaded program `my_max` — the second fork in the deck:
+
+```python
+def my_max(a: int, b: int) -> int:
+    if a < b:
+        return b
+    return a
+```
+
+Note the equality case: when `a = b` the test fails and the program returns
+`a` — which is what `max a b` picks there too. -/
+DefinitionDoc my_max as "my_max" in "Python programs"
+
 /-- The loaded module `arith` — a grab bag of one-liners; the game uses:
 
 ```python
@@ -440,6 +453,43 @@ def odd_sum(n):
 does. -/
 DefinitionDoc odd_sum as "odd_sum" in "Python programs"
 
+/-- The loaded program `double_sum` — sums the first `n` even numbers:
+
+```python
+def double_sum(n):
+    total = 0
+    k = 0
+    while k < n:
+        total = total + 2 * k
+        k = k + 1
+    return total
+```
+
+`0 + 2 + 4 + ⋯` — a near-twin of `tri`'s loop, for invariant practice: the
+books this time are a pure product, no division anywhere. -/
+DefinitionDoc double_sum as "double_sum" in "Python programs"
+
+/-- The loaded program `steps` — a branch inside a loop:
+
+```python
+def steps(n):
+    count = 0
+    while n != 0:
+        if 0 < n:
+            n = n - 1
+        else:
+            n = n + 1
+        count = count + 1
+    return count
+```
+
+Whatever side of zero `n` starts on, it walks home one step at a time — an
+absolute value computed without ever writing `abs`. The loop mutates `n`
+(so the theorem binds the initial value as capital `N`), and the branch
+means preservation has one residual per side, each carrying its branch
+fact. -/
+DefinitionDoc steps as "steps" in "Python programs"
+
 /-- The loaded program `sum_to` — triangular numbers again, but counting
 **down**, mutating its own argument:
 
@@ -513,6 +563,11 @@ TheoremDoc Int.fmod_nonneg as "fmod_nonneg" in "Int"
 is strictly smaller than a positive divisor. This is why Euclid *terminates*:
 the measure `b.toNat` strictly drops each iteration. -/
 TheoremDoc Int.fmod_lt_of_pos as "fmod_lt_of_pos" in "Int"
+
+/-- `Int.gcd_comm : Int.gcd a b = Int.gcd b a` — the gcd doesn't care which
+argument comes first. Rewrite with it to line a goal's value up with
+`gcd_total`'s, then let `py_corollary` collect. -/
+TheoremDoc Int.gcd_comm as "gcd_comm" in "Int"
 
 /-- `Int.gcd_zero_right : Int.gcd a 0 = a.natAbs` — when the loop is done
 (`b = 0`), the gcd is just `|a|`. The last algebraic step of the `gcd`

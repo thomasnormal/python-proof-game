@@ -1,9 +1,9 @@
-import Game.Levels.StraightLineWorld.L07_Clamp01Boss
+import Game.Levels.StraightLineWorld.L08_Clamp01Boss
 
 open LeanModels LeanModels.Python
 
 World "StraightLineWorld"
-Level 8
+Level 9
 
 Title "The machine rises"
 
@@ -42,8 +42,8 @@ Statement clamp01_machine (x : PyInt) : ag_clamp01.clamp01(x) ==> min 1 (max 0 x
   Hint "Three goals, one per `return` — tagged `ret`, `ret2`, `ret3` (goals
   that would share a tag get numbered) — each bare integer arithmetic, the
   branch facts sitting in your hypotheses as `hif`. No fuel, no interpreter,
-  no `Val` anywhere: the machine already ate all of that. Sweep them:
-  `all_goals omega`."
+  no `Val` anywhere: the machine already ate all of that. Sweep them."
+  Hint (hidden := true) "`all_goals omega`."
   all_goals omega
 
 Conclusion "

@@ -1,14 +1,14 @@
-import Game.Levels.LoopWorld.L04_SumTo
+import Game.Levels.LoopWorld.L06_Steps
 
 open LeanModels LeanModels.Python
 
 World "LoopWorld"
-Level 5
+Level 7
 
 Title "Euclid's invariant"
 
 Introduction "
-The oldest algorithm with a name, verbatim:
+The oldest named algorithm, verbatim:
 
 ```python
 def gcd(a: int, b: int) -> int:
@@ -18,38 +18,23 @@ def gcd(a: int, b: int) -> int:
 ```
 
 The claim: for `A, B ≥ 0`, this returns `Int.gcd A B`. Both variables are
-assigned (tuple assignment), so both are clause binders — and both initial
-values get capitalized theorem binders `A`, `B`, exactly the sum_to move,
-twice.
+assigned (tuple assignment), so both are clause binders, with capital
+theorem binders for the initial values: the `sum_to` move, twice.
 
-So far every invariant was bookkeeping. This one is a **theorem of
-Euclid's**: the pair `(a, b)` changes every lap, but its gcd never does —
+Every invariant so far was bookkeeping. This one is a **theorem of
+Euclid's**: the pair changes every lap, but its gcd never does —
 
 `inv := fun (a b : Int) => 0 ≤ a ∧ 0 ≤ b ∧ Int.gcd a b = Int.gcd A B`
 
-with measure `b.toNat` (the remainder strictly shrinks). The residuals this
-time are *number theory*, and a bare `grind` won't carry them — you'll close
-them one by one with the spec-side library (part fresh in your inventory,
-part carried since “Floor means floor”, all stated over `Int.fmod`, because
-Python's `%` *is* `Int.fmod`). Five goals, each with its own `case` tag —
-preservation splits in two, and same-tag goals get numbered, so the second
-one answers to `case preserve2`:
+with measure `b.toNat` — the remainder shrinks. This time the residuals are
+*number theory*; a bare `grind` won't carry them — you close them `case`
+by `case` with the `Int.fmod` library in your inventory
+(Python's `%` *is* `Int.fmod`). `exit` is written out in the editor;
+`preserve`, `preserve2`, `dec`, `ret` are yours.
 
-1. **`exit`** — package the answer at `b = 0`: witness the final `a`, then
-   `Int.gcd a 0 = a.natAbs` closes it. Given in the editor — read it, it's
-   the shape from L1's `exit`, written by hand with the anonymous
-   constructor `⟨…⟩`.
-2. **`preserve`** — the new remainder is nonnegative: `Int.fmod_nonneg`.
-3. **`preserve2`** — the gcd survives the swap: rewrite with
-   `gcd_fmod_step` (that *is* Euclid's lemma), then the old invariant.
-4. **`dec`** — the remainder shrinks: `Int.fmod_lt_of_pos`, plus
-   `Int.fmod_nonneg` to clear the `max`, then `omega`.
-5. **`ret`** — cash out: `grind [Int.gcd_zero_right, Int.natAbs_of_nonneg]`
-   — the brackets hand `grind` the two theorems as extra ammunition.
-
-The sign hypotheses on those lemmas are not decoration — `Int.gcd 4 (-6) = 2`
-but Python computes `4 % -6 == -2` (CPython agrees; it's in the differential
-test suite). Your `0 ≤ a ∧ 0 ≤ b` conjuncts are what feed them.
+The sign hypotheses on those lemmas are not decoration —
+`Int.gcd 4 (-6) = 2` but Python computes `4 % -6 == -2` (CPython agrees).
+Your `0 ≤ a ∧ 0 ≤ b` conjuncts are what feed them.
 "
 
 /-- `gcd(A, B) ==> Int.gcd A B` for all `A, B ≥ 0` — Euclid's algorithm
@@ -103,7 +88,8 @@ interpreter. The walker ate the semantics; you supplied mathematics —
 `gcd_fmod_step` is literally Proposition VII.2, restated over the `%` of a
 programming language that ships on a billion machines.
 
-One level left. Bring everything.
+That was the hardest hand-work in the world. Next level is a breather — and
+a payday.
 "
 
 NewTactic rw

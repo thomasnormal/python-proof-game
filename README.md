@@ -20,13 +20,18 @@ in the playful style of the Natural Number Game.
 
 ## Contents
 
-- **World 1 — Machine World** (4 levels): concrete runs; the kernel executes
+- **World 1 — Machine World** (6 levels): concrete runs; the kernel executes
   Python inside your proofs. Ends at the symbolic bridge.
-- **World 2 — Straight-Line World** (5 levels): symbolic inputs, `py_prove`,
-  honest floor division, preconditions as hypotheses, and a boss fight at the
-  documented boundary of the automation.
-- **Worlds 3–4** (Loop World, RSA World): designed in
-  [GAME_PLAN.md](GAME_PLAN.md), not yet built.
+- **World 2 — Straight-Line World** (9 levels): symbolic inputs, `py_prove`,
+  the floor arc (prove `//` floors, then prove Python and C disagree),
+  preconditions as hypotheses, and a boss fight at the documented boundary
+  of the automation — then the boss fight, mechanized (`py_vcgen`).
+- **World 3 — Loop World** (9 levels): `while` loops; invent invariants and
+  decreasing measures, survive a shadowed argument and a branch in the loop
+  body, prove Euclid, cash out a corollary, and beat a nested-loop,
+  `break`-and-`return` boss.
+- **World 4** (RSA World): designed in [GAME_PLAN.md](GAME_PLAN.md), not
+  yet built.
 
 `GAME_PLAN.md` also records the toolchain reconciliation (this game runs the
 lean4game `v4.31.0` GameServer on Lean `v4.33.0-rc1`) and the publication
@@ -58,6 +63,7 @@ open `http://localhost:3000/#/g/local/python-proof-game`.
 | `Game/Doc.lean` | Inventory docs: tactics, judgments, programs |
 | `Game/Levels/MachineWorld/` | World 1 levels |
 | `Game/Levels/StraightLineWorld/` | World 2 levels |
+| `Game/Levels/LoopWorld/` | World 3 levels |
 | `GameAssets/envelopes/` | Bundled JSON envelopes + the `.py` sources they were extracted from |
 | `GAME_PLAN.md` | Roadmap, toolchain findings, publication checklist |
 

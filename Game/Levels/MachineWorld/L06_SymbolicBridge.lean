@@ -1,22 +1,22 @@
-import Game.Levels.MachineWorld.L03_ModRaise
+import Game.Levels.MachineWorld.L05_CrashEncore
 
 open LeanModels LeanModels.Python
 
 World "MachineWorld"
-Level 4
+Level 6
 
 Title "The bridge: every input at once"
 
 Introduction "
-Same module, its sibling function:
+Back to `floordiv`:
 
 ```python
 def floordiv(a, b):
     return a // b
 ```
 
-Last level you proved `mod(7, 0)` raises. Nice. What about `floordiv(8, 0)`?
-`floordiv(-3, 0)`? `floordiv(10¹⁰⁰, 0)`?
+Last level you proved `floordiv(-3, 0)` raises. Nice. What about
+`floordiv(8, 0)`? `floordiv(10¹⁰⁰, 0)`?
 
 Look at the goal: `a` is now a **variable** — `(a : PyInt)` means *every*
 Python integer at once. `py_check` is no use here, and it knows it: try it,
@@ -50,8 +50,9 @@ abstract, and discharged what was left. The result is a statement no amount
 of testing reaches: **for all** `a`.
 
 That's Machine World cleared. Next: Straight-Line World, where the *values*
-go symbolic too.
+go symbolic too — its first patient, `add`, is already in your inventory.
 "
 
 NewTactic py_prove
 NewHiddenTactic Template
+NewDefinition add

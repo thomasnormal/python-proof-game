@@ -31,8 +31,10 @@ TheoremDoc add_total as "add_total" in "Python programs"
 /-- For all integers `a` and `b`, running the Python program `add` terminates
 and returns `a + b`. -/
 Statement add_total (a b : PyInt) : add(a, b) ==> a + b := by
-  Hint "Symbolic execution, one call: `py_prove [add]`. The bracket names the
-  program constant so the tactic can unfold the code."
+  Hint "Symbolic execution, one call — you watched the exact move on the
+  bridge. The bracket names the program constant so the tactic can unfold
+  the code."
+  Hint (hidden := true) "`py_prove [add]`."
   py_prove [add]
 
 Conclusion "
@@ -42,5 +44,3 @@ Worth savoring what it excludes: no exception, no unsupported construct, no
 wrong value — for every pair of integers, including the ones wider than your
 RAM.
 "
-
-NewDefinition add

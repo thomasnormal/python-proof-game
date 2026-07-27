@@ -32,13 +32,14 @@ TheoremDoc midpoint_three_negfour as "midpoint_three_negfour" in "Python runs"
 /-- Running `midpoint` on `3` and `-4` terminates and returns `-1` — floor
 division rounds toward minus infinity. -/
 Statement midpoint_three_negfour : midpoint(3, -4) ==> -1 := by
-  Hint "A closed run again — `py_check` executes it."
+  Hint "A concrete run again — same opening move as `tri(4)`."
+  Hint (hidden := true) "`py_check` — the kernel computes the run and lands
+  on `-1`."
   py_check
 
 Conclusion "
 The machine agreed: `-1`. Remember this level — in Straight-Line World the
 floor-vs-truncation distinction stops being a party trick and becomes part of
-an honest theorem *statement*.
+an honest theorem *statement*. First, one more round against your C
+instincts.
 "
-
-NewDefinition midpoint
