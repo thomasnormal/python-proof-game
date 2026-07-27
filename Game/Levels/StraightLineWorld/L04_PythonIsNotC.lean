@@ -74,7 +74,7 @@ impossibility theorem. So when a hasty port of Python code to C silently
 turns `-7 // 2 == -4` into `-7 / 2 == -3`, that is not a folklore gotcha —
 it is the negation of a theorem you have proved.
 
-Back to the regular program: preconditions.
+Back to the regular program: cashing proved runs into prettier statements.
 "
 
 NewTactic intro omega

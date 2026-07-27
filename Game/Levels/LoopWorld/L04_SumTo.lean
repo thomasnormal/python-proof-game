@@ -71,9 +71,12 @@ Statement sum_to_total (N : PyInt) (hN : 0 ≤ N) : sum_to(N) ==> N * (N + 1) / 
 Conclusion "
 The shadowing rule in one line: **clause binders belong to the loop; the
 theorem owns everything else** — so when Python mutates its own argument,
-rename at the theorem and keep the Python names for the clauses. (This is
-exactly how the lean-surfaces gallery states this theorem, for exactly this
-reason.)
+rename at the theorem and keep the Python names for the clauses. (The
+lean-surfaces gallery makes the same move for the same reason, with one
+wrinkle of packaging: it proves the capital-`N` statement as a `private`
+core lemma and re-exports it through a public wrapper whose binder is plain
+lowercase `n` — so its *published* statement hides the rename. The game
+keeps the honest capital `N` in view.)
 
 Next: the oldest algorithm in the book, and an invariant that isn't
 bookkeeping — it's a *theorem about numbers*.

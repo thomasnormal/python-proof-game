@@ -1,4 +1,4 @@
-import Game.Levels.StraightLineWorld.L05_MidpointNonneg
+import Game.Levels.StraightLineWorld.L05_MidpointDiv
 
 open LeanModels LeanModels.Python
 

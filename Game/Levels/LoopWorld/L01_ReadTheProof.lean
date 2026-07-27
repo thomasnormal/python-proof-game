@@ -40,12 +40,17 @@ editor — **read** them before you run them:
 * `dec := fun (total i : Int) => (n + 1 - i).toNat` — the distance still to
   travel, as a natural number.
 
-`py_vcgen` opens the loop with them and leaves five *residual* goals, each
+`py_vcgen` opens the loop with them and leaves six *residual* goals, each
 tagged with its role — this is the shape of every loop proof you'll ever do:
 
 * **`init`** — the invariant holds on entry (`total = 0`, `i = 0`).
-* **`preserve`** — one body pass keeps it (the test fact `hcont : i ≤ n` is
-  in scope — the body only runs when the test passed).
+* **`preserve`** and **`preserve2`** — one body pass keeps the invariant
+  (the test fact `hcont : i ≤ n` is in scope — the body only runs when the
+  test passed). Preservation splits along the invariant's conjuncts; the
+  walker closes what it can on the spot and leaves two — the range floor
+  and the books. When goals share a tag, the walker numbers them: the first
+  keeps the bare tag, the second becomes `preserve2`, so each has its own
+  `case` address.
 * **`dec`** — the measure strictly drops on that same pass.
 * **`exit`** — bookkeeping: repackage the invariant and the negated test at
   the moment the loop ends (a goal full of `∃`s; `grind` eats it whole).

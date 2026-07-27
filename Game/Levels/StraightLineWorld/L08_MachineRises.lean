@@ -39,7 +39,8 @@ the machine does the walking. -/
 Statement clamp01_machine (x : PyInt) : ag_clamp01.clamp01(x) ==> min 1 (max 0 x) := by
   Hint "Unleash it: `py_vcgen [ag_clamp01]`."
   py_vcgen [ag_clamp01]
-  Hint "Three goals, one per `return` — each is bare integer arithmetic, the
+  Hint "Three goals, one per `return` — tagged `ret`, `ret2`, `ret3` (goals
+  that would share a tag get numbered) — each bare integer arithmetic, the
   branch facts sitting in your hypotheses as `hif`. No fuel, no interpreter,
   no `Val` anywhere: the machine already ate all of that. Sweep them:
   `all_goals omega`."

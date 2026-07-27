@@ -56,13 +56,15 @@ What the shape demands:
   `(exit2 := fun (m : Int) => 0 ≤ m ∧ m < i ∧ (2:Int) ∣ (n - m))` states
   what is true at *either* door — the walker then makes the test-false door
   imply it and makes the `break` site (branch fact `m < i` in hand) establish
-  it. Note it may mention the outer `i` by name.
-
-One piece of housekeeping first: `omega`-style arithmetic wants the
-precondition unbranded, so open with `have hn2 : (2 : Int) ≤ n := hn`.
+  it. Note it may mention the outer `i` by name. And you don't have to know
+  any of this in advance: call `py_vcgen [nested_flow]` *bare* and the
+  walker asks for everything it needs — `inv1`, `dec1`, `inv2`, `dec2`,
+  **and** an `exit2` clause goal for the `break`-carrying loop. The exit
+  clause is a first-class request, not folklore.
 
 Assemble the call, then sweep — every residual the walker leaves is
-elementary, and `all_goals grind` clears the board.
+elementary, and `all_goals grind` clears the board. (No housekeeping
+needed: `grind` reads the branded precondition `hn` as it stands.)
 "
 
 /-- `first_factor(n) ==> 2` for even `n ≥ 2` — total correctness through a
@@ -75,10 +77,7 @@ returns `2` — through a nested loop, a `break`, and a `return` from the
 middle of the outer loop. -/
 Statement first_factor_even (n : PyInt) (hn : 2 ≤ n) (h2 : (2:Int) ∣ n) :
     nested_flow.first_factor(n) ==> 2 := by
-  Hint "Housekeeping first: `have hn2 : (2 : Int) ≤ n := hn` — a copy of the
-  precondition stated over `Int`, where the arithmetic closers can see it."
-  have hn2 : (2 : Int) ≤ n := hn
-  Hint "Now the full call — five clauses: outer `inv1 := fun (i : Int) => i = 2`
+  Hint "The full call — five clauses: outer `inv1 := fun (i : Int) => i = 2`
   and `dec1 := fun (i : Int) => (n - i).toNat`; inner
   `inv2 := fun (m : Int) => 0 ≤ m ∧ (2:Int) ∣ (n - m)` and
   `dec2 := fun (m : Int) => m.toNat`; and the break's
@@ -91,11 +90,12 @@ Statement first_factor_even (n : PyInt) (hn : 2 ≤ n) (h2 : (2:Int) ∣ n) :
     (inv2 := fun (m : Int) => 0 ≤ m ∧ (2:Int) ∣ (n - m))
     (dec2 := fun (m : Int) => m.toNat)
     (exit2 := fun (m : Int) => 0 ≤ m ∧ m < i ∧ (2:Int) ∣ (n - m))
-  Hint "Nine residuals — outer exit, inner init, the two doors of the inner
-  exit, inner preservation and decrease, outer preservation and decrease
-  (both with *contradictory* hypotheses: the lap is unreachable, `False` is
-  provable), and the final `return n` — every one elementary. Sweep:
-  `all_goals grind`."
+  Hint "Nine residuals — the outer `exit`, the inner `init`, the two doors
+  of the inner exit (`exit2` and `exit3` — same-tag goals get numbered),
+  inner preservation and decrease (`preserve`, `dec`), outer preservation
+  and decrease (`preserve2`, `dec2` — both with *contradictory* hypotheses:
+  the lap is unreachable, `False` is provable), and the final `return n`
+  (`ret`) — every one elementary. Sweep: `all_goals grind`."
   all_goals grind
 
 Conclusion "

@@ -19,8 +19,10 @@ Last level you proved `mod(7, 0)` raises. Nice. What about `floordiv(8, 0)`?
 `floordiv(-3, 0)`? `floordiv(10¹⁰⁰, 0)`?
 
 Look at the goal: `a` is now a **variable** — `(a : PyInt)` means *every*
-Python integer at once. `py_check` is useless here: there is nothing concrete
-to run. You cannot run infinitely many test cases.
+Python integer at once. `py_check` is no use here, and it knows it: try it,
+and it refuses on sight — a free variable means there is nothing concrete to
+run, and it tells you whose territory you've crossed into. You cannot run
+infinitely many test cases.
 
 You need *symbolic execution*: walk the interpreter through the body with `a`
 left abstract. The tactic `py_prove [arith]` does exactly that — pass it the

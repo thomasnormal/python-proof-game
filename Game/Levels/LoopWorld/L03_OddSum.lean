@@ -55,8 +55,8 @@ Statement odd_sum_total (n : PyInt) (hn : 0 ≤ n) : odd_sum(n) ==> n * n := by
   py_vcgen [odd_sum]
     (inv := fun (total k : Int) => 0 ≤ k ∧ k ≤ n ∧ total = k * k)
     (dec := fun (total k : Int) => (n - k).toNat)
-  Hint "All four residuals are `grind`-shaped this time — even the exit: from
-  `¬ k' < n` and `k' ≤ n`, `grind` pins `k' = n` and rewrites
+  Hint "All five residuals are `grind`-shaped this time — even the `ret`
+  payout: from `¬ k' < n` and `k' ≤ n`, `grind` pins `k' = n` and rewrites
   `total' = k' * k'` into the goal. Sweep: `all_goals grind`."
   all_goals grind
 

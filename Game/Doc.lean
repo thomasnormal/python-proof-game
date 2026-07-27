@@ -37,6 +37,31 @@ wheel yourself. Extra fuel is always harmless — a finished run keeps its
 result. -/
 TacticDoc refine
 
+/-- `⟨…, …⟩` — the **anonymous constructor**: builds a value of the goal's
+structure-like type without naming its constructor. On an `∃`-goal,
+`⟨w, proof⟩` supplies the witness and the proof of the rest; components
+nest (`⟨a, ⟨rfl, hx⟩, h⟩` fills a chain of `∃`/`∧`), and a component can be
+a tactic block (`by rw [...]`) or a `?_` hole for `refine` to leave open.
+
+Where you meet it: every `==>` statement *is* an existential — “**some**
+fuel finishes the run” — so `refine ⟨32, ?_⟩` donates the fuel witness and
+leaves the run as the goal; and a loop's `exit` goal asks you to package
+final values with the facts about them, e.g.
+`exact ⟨a, ⟨rfl, hx⟩, hcore.1, …⟩`. -/
+DefinitionDoc AnonymousConstructor as "⟨…⟩"
+
+/-- `tac₁ <;> tac₂` — the *and-then-on-every-goal* combinator: run `tac₁`,
+then run `tac₂` on **every** goal it produced (a plain newline sequence
+would aim `tac₂` at the first goal only).
+
+The house one-breath idiom:
+`by_cases h1 : x < 0 <;> by_cases h2 : 1 < x <;> py_simp […] <;> grind` —
+split, split again on *both* results (four cases), execute all four
+symbolically, sweep all four with arithmetic. Chains act stage by stage:
+each `<;>` applies its right-hand tactic to all goals the stage before it
+left. -/
+TacticDoc «<;>»
+
 /-- `py_prove [prog]` closes total-correctness goals (`f(a, b) ==> v`,
 `f(a) ==>! e`) for straight-line *and single-branching* loop-free bodies.
 
@@ -47,7 +72,11 @@ discharges the residual value equations with `rfl`/`omega`. If a symbolic
 with `omega`.
 
 Its limit is honest: *two sequential* `if`s produce a shape its single-`split`
-recipe cannot attack — that is the boss level of Straight-Line World. -/
+recipe cannot attack — that is the boss level of Straight-Line World. And it
+fails *curated*: when a body leaves interpreter state unresolved (a mangled
+second `if`, a `while` loop), the error is a one-paragraph pointer toward
+`py_vcgen` and the manual `py_simp` route — never a dump of raw interpreter
+internals. -/
 TacticDoc py_prove
 
 /-- `py_corollary [tot, extras…]` closes a standard corollary of an already
@@ -96,7 +125,12 @@ split, a `b ≠ 0` goal of your own — elaborate brand-headed, and `omega`
 skips anything whose head type is the brand; `grind` matches up to reducible
 unfolding, so it sees through. Second, `omega` is strictly *linear*: a
 product of two variables like `b * q` is out of its language, while `grind`
-happily treats it as an atom and reasons around it. -/
+happily treats it as an atom and reasons around it.
+
+You can also hand it ammunition in brackets:
+`grind [Int.gcd_zero_right, Int.natAbs_of_nonneg]` adds the named theorems
+to its matching pool for this one call — the house way to say *finish,
+using these facts*. -/
 TacticDoc grind
 
 /-- `omega` decides linear integer arithmetic goals: anything built from
@@ -119,7 +153,10 @@ and each `while` is opened by the loop rule. Everything the interpreter can
 answer is answered on the spot; what it cannot invent is *appended* as goals —
 pure mathematics over named atoms, tagged by their role: `init` (the invariant
 holds on entry), `preserve` (one loop body keeps it), `dec` (the measure
-drops), `exit`/`ret` (from the exit facts to the returned value).
+drops), `exit`/`ret` (from the exit facts to the returned value). When
+several residuals share a tag, the first keeps the bare tag and the rest are
+numbered — `preserve`, `preserve2`, … — so every goal stays addressable by
+`case`.
 
 Loops need the two pieces of content no tactic can invent — the **invariant**
 and the **decreasing measure**. Hand them over as clauses:
@@ -135,9 +172,10 @@ them `inv1`, `dec1`, … when there are several). Binder names must be the
 Python names of the variables **assigned in that loop's body**; everything
 else stays pinned and can be mentioned directly. *Omit* the clauses and the
 walker leaves them as delayed goals `inv1`/`dec1` — the proof pauses until you
-invent the invariant. An `(exit := …)` clause states a loop's exit fact
-explicitly — required when a `break` escapes a loop and the code after it
-needs more than the bare invariant. -/
+invent the invariant — and a `break`-carrying loop gets its exit clause
+requested the same way (`exit2`). An `(exit := …)` clause states a loop's
+exit fact explicitly — a loop with a `break` has *two* doors out, and the
+bare invariant plus negated test only describes one. -/
 TacticDoc py_vcgen
 
 /-- `all_goals tac` runs `tac` on every remaining goal and insists it closes
@@ -149,13 +187,15 @@ them in one line. Handle any goal that needs special treatment first (e.g.
 with `case ret => …`), then sweep the rest. -/
 TacticDoc all_goals
 
-/-- `case tag => tac` focuses the (first) goal tagged `tag`.
+/-- `case tag => tac` focuses the goal tagged `tag`.
 
 `py_vcgen` tags everything it leaves behind: delayed loop clauses are
 `inv1`, `dec1`, …; math residuals are `init`, `preserve`, `dec`, `exit`,
-`ret`. So `case inv1 => …` answers the walker's request for an invariant,
-and `case ret => …` picks out the return-value goal for special treatment
-before an `all_goals` sweep. -/
+`ret` — and when several residuals would share a tag, the first keeps the
+bare name and the rest are numbered (`preserve`, `preserve2`, …), so each
+one has its own address. `case inv1 => …` answers the walker's request for
+an invariant, and `case ret => …` picks out the return-value goal for
+special treatment before an `all_goals` sweep. -/
 TacticDoc case
 
 /-- `exact e` closes the goal with the term `e`, exactly.
@@ -187,13 +227,10 @@ TacticDoc rfl
 /-- `have h : P := e` (or `have h : P := by tac`) adds a proved fact `h : P`
 to the context.
 
-House uses, in order of appearance: **staging** — pull the pieces of an
-argument into the context one line at a time (a run fact proved by
-`py_prove`, the division-algorithm bounds, a determinism equation), then let
-a finisher sweep the assembled facts; and **rebranding** — a hypothesis
-stated over `PyInt` (the brand on statement binders) can be invisible to
-`omega`, and `have hn2 : (2 : Int) ≤ n := hn` restates it at `Int` — same
-proof, now `omega`-visible. -/
+Its house use is **staging**: pull the pieces of an argument into the
+context one line at a time (a run fact proved by `py_prove`, the
+division-algorithm bounds, a determinism equation), then let a finisher
+sweep the assembled facts. -/
 TacticDoc «have»
 
 /-- `rw [h₁, h₂, …]` rewrites the goal left-to-right with the given

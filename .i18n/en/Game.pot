@@ -1,7 +1,7 @@
 msgid ""
 msgstr "Project-Id-Version: Game v4.33.0-rc1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-07-26\n"
+"POT-Creation-Date: 2026-07-27\n"
 "Last-Translator: \n"
 "Language-Team: none\n"
 "Language: en\n"
@@ -62,6 +62,52 @@ msgid "§0 fills in the goal with the expression §1, leaving every §2\n"
 "result."
 msgstr ""
 
+#. §0: `⟨…, …⟩`
+#. §1: `∃`
+#. §2: `⟨w, proof⟩`
+#. §3: `⟨a, ⟨rfl, hx⟩, h⟩`
+#. §4: `∃`
+#. §5: `∧`
+#. §6: `by rw [...]`
+#. §7: `?_`
+#. §8: `refine`
+#. §9: `==>`
+#. §10: `refine ⟨32, ?_⟩`
+#. §11: `exit`
+#. §12: `exact ⟨a, ⟨rfl, hx⟩, hcore.1, …⟩`
+#: Game/Doc.lean:40
+msgid "§0 — the **anonymous constructor**: builds a value of the goal's\n"
+"structure-like type without naming its constructor. On an §1-goal,\n"
+"§2 supplies the witness and the proof of the rest; components\n"
+"nest (§3 fills a chain of §4/§5), and a component can be\n"
+"a tactic block (§6) or a §7 hole for §8 to leave open.\n"
+"\n"
+"Where you meet it: every §9 statement *is* an existential — “**some**\n"
+"fuel finishes the run” — so §10 donates the fuel witness and\n"
+"leaves the run as the goal; and a loop's §11 goal asks you to package\n"
+"final values with the facts about them, e.g.\n"
+"§12."
+msgstr ""
+
+#. §0: `tac₁ <;> tac₂`
+#. §1: `tac₁`
+#. §2: `tac₂`
+#. §3: `tac₂`
+#. §4: `by_cases h1 : x < 0 <;> by_cases h2 : 1 < x <;> py_simp […] <;> grind`
+#. §5: `<;>`
+#: Game/Doc.lean:53
+msgid "§0 — the *and-then-on-every-goal* combinator: run §1,\n"
+"then run §2 on **every** goal it produced (a plain newline sequence\n"
+"would aim §3 at the first goal only).\n"
+"\n"
+"The house one-breath idiom:\n"
+"§4 —\n"
+"split, split again on *both* results (four cases), execute all four\n"
+"symbolically, sweep all four with arithmetic. Chains act stage by stage:\n"
+"each §5 applies its right-hand tactic to all goals the stage before it\n"
+"left."
+msgstr ""
+
 #. §0: `py_prove [prog]`
 #. §1: `f(a, b) ==> v`
 #. §2: `f(a) ==>! e`
@@ -75,7 +121,11 @@ msgstr ""
 #. §10: `omega`
 #. §11: `if`
 #. §12: `split`
-#: Game/Doc.lean:40
+#. §13: `if`
+#. §14: `while`
+#. §15: `py_vcgen`
+#. §16: `py_simp`
+#: Game/Doc.lean:65
 msgid "§0 closes total-correctness goals (§1,\n"
 "§2) for straight-line *and single-branching* loop-free bodies.\n"
 "\n"
@@ -86,7 +136,11 @@ msgid "§0 closes total-correctness goals (§1,\n"
 "with §10.\n"
 "\n"
 "Its limit is honest: *two sequential* §11s produce a shape its single-§12\n"
-"recipe cannot attack — that is the boss level of Straight-Line World."
+"recipe cannot attack — that is the boss level of Straight-Line World. And it\n"
+"fails *curated*: when a body leaves interpreter state unresolved (a mangled\n"
+"second §13, a §14 loop), the error is a one-paragraph pointer toward\n"
+"§15 and the manual §16 route — never a dump of raw interpreter\n"
+"internals."
 msgstr ""
 
 #. §0: `py_corollary [tot, extras…]`
@@ -100,7 +154,7 @@ msgstr ""
 #. §8: `assumption`
 #. §9: `extras`
 #. §10: `py_corollary [midpoint_spec, Int.fdiv_eq_ediv_of_nonneg]`
-#: Game/Doc.lean:53
+#: Game/Doc.lean:82
 msgid "§0 closes a standard corollary of an already\n"
 "proved total-correctness theorem §1 — *without re-executing the program*.\n"
 "\n"
@@ -121,7 +175,7 @@ msgstr ""
 #. §6: `py_prove`
 #. §7: `py_simp`
 #. §8: `py_prove`
-#: Game/Doc.lean:64
+#: Game/Doc.lean:93
 msgid "§0 is the framework's symbolic-execution workhorse: §1\n"
 "armed with the interpreter's equations. Passing the loaded program constant\n"
 "(e.g. §2) unfolds the Python AST; passing §3 starts the\n"
@@ -143,7 +197,7 @@ msgstr ""
 #. §8: `intro h`
 #. §9: `h : P`
 #. §10: `False`
-#: Game/Doc.lean:74
+#: Game/Doc.lean:103
 msgid "§0 — when the goal is an implication §1 (or a §2), move the\n"
 "antecedent into the context as a hypothesis §3, leaving §4 to prove.\n"
 "\n"
@@ -158,7 +212,7 @@ msgstr ""
 #. §3: `if`
 #. §4: `by_cases h1 : x < 0 <;> by_cases h2 : 1 < x`
 #. §5: `py_simp`
-#: Game/Doc.lean:82
+#: Game/Doc.lean:111
 msgid "§0 splits the proof into two: one goal with §1, one\n"
 "with §2.\n"
 "\n"
@@ -178,7 +232,8 @@ msgstr ""
 #. §8: `omega`
 #. §9: `b * q`
 #. §10: `grind`
-#: Game/Doc.lean:90
+#. §11: `grind [Int.gcd_zero_right, Int.natAbs_of_nonneg]`
+#: Game/Doc.lean:119
 msgid "§0 is core Lean's general-purpose finisher: congruence closure plus\n"
 "e-matching plus integer arithmetic over your hypotheses.\n"
 "\n"
@@ -188,7 +243,12 @@ msgid "§0 is core Lean's general-purpose finisher: congruence closure plus\n"
 "skips anything whose head type is the brand; §7 matches up to reducible\n"
 "unfolding, so it sees through. Second, §8 is strictly *linear*: a\n"
 "product of two variables like §9 is out of its language, while §10\n"
-"happily treats it as an atom and reasons around it."
+"happily treats it as an atom and reasons around it.\n"
+"\n"
+"You can also hand it ammunition in brackets:\n"
+"§11 adds the named theorems\n"
+"to its matching pool for this one call — the house way to say *finish,\n"
+"using these facts*."
 msgstr ""
 
 #. §0: `omega`
@@ -206,7 +266,7 @@ msgstr ""
 #. §12: `Int.fdiv a b`
 #. §13: `b * q`
 #. §14: `-3 = -4`
-#: Game/Doc.lean:102
+#: Game/Doc.lean:136
 msgid "§0 decides linear integer arithmetic goals: anything built from\n"
 "§1/§2 variables with §3, §4, §5-by-constants, §6, §7, §8.\n"
 "\n"
@@ -228,21 +288,26 @@ msgstr ""
 #. §6: `dec`
 #. §7: `exit`
 #. §8: `ret`
-#. §9: ```
+#. §9: `preserve`
+#. §10: `preserve2`
+#. §11: `case`
+#. §12: ```
 #. py_vcgen [prog]
 #.   (inv := fun (x y : Int) => …)
 #.   (dec := fun (x y : Int) => …)
 #. ```
-#. §10: `inv`
-#. §11: `dec`
-#. §12: `while`
-#. §13: `inv1`
-#. §14: `dec1`
-#. §15: `inv1`
-#. §16: `dec1`
-#. §17: `(exit := …)`
-#. §18: `break`
-#: Game/Doc.lean:114
+#. §13: `inv`
+#. §14: `dec`
+#. §15: `while`
+#. §16: `inv1`
+#. §17: `dec1`
+#. §18: `inv1`
+#. §19: `dec1`
+#. §20: `break`
+#. §21: `exit2`
+#. §22: `(exit := …)`
+#. §23: `break`
+#: Game/Doc.lean:148
 msgid "§0 is the **VC-generating walker** — the whole manual\n"
 "pipeline, mechanized. From a §1 goal it bridges to the function\n"
 "body and walks it statement by statement: straight-line segments are\n"
@@ -251,21 +316,25 @@ msgid "§0 is the **VC-generating walker** — the whole manual\n"
 "answer is answered on the spot; what it cannot invent is *appended* as goals —\n"
 "pure mathematics over named atoms, tagged by their role: §4 (the invariant\n"
 "holds on entry), §5 (one loop body keeps it), §6 (the measure\n"
-"drops), §7/§8 (from the exit facts to the returned value).\n"
+"drops), §7/§8 (from the exit facts to the returned value). When\n"
+"several residuals share a tag, the first keeps the bare tag and the rest are\n"
+"numbered — §9, §10, … — so every goal stays addressable by\n"
+"§11.\n"
 "\n"
 "Loops need the two pieces of content no tactic can invent — the **invariant**\n"
 "and the **decreasing measure**. Hand them over as clauses:\n"
 "\n"
-"§9\n"
+"§12\n"
 "\n"
-"The i-th §10/§11 pair belongs to the i-th §12 (source order; label\n"
-"them §13, §14, … when there are several). Binder names must be the\n"
+"The i-th §13/§14 pair belongs to the i-th §15 (source order; label\n"
+"them §16, §17, … when there are several). Binder names must be the\n"
 "Python names of the variables **assigned in that loop's body**; everything\n"
 "else stays pinned and can be mentioned directly. *Omit* the clauses and the\n"
-"walker leaves them as delayed goals §15/§16 — the proof pauses until you\n"
-"invent the invariant. An §17 clause states a loop's exit fact\n"
-"explicitly — required when a §18 escapes a loop and the code after it\n"
-"needs more than the bare invariant."
+"walker leaves them as delayed goals §18/§19 — the proof pauses until you\n"
+"invent the invariant — and a §20-carrying loop gets its exit clause\n"
+"requested the same way (§21). An §22 clause states a loop's\n"
+"exit fact explicitly — a loop with a §23 has *two* doors out, and the\n"
+"bare invariant plus negated test only describes one."
 msgstr ""
 
 #. §0: `all_goals tac`
@@ -274,7 +343,7 @@ msgstr ""
 #. §3: `all_goals grind`
 #. §4: `all_goals omega`
 #. §5: `case ret => …`
-#: Game/Doc.lean:143
+#: Game/Doc.lean:181
 msgid "§0 runs §1 on every remaining goal and insists it closes\n"
 "them all.\n"
 "\n"
@@ -294,24 +363,28 @@ msgstr ""
 #. §7: `dec`
 #. §8: `exit`
 #. §9: `ret`
-#. §10: `case inv1 => …`
-#. §11: `case ret => …`
-#. §12: `all_goals`
-#: Game/Doc.lean:152
-msgid "§0 focuses the (first) goal tagged §1.\n"
+#. §10: `preserve`
+#. §11: `preserve2`
+#. §12: `case inv1 => …`
+#. §13: `case ret => …`
+#. §14: `all_goals`
+#: Game/Doc.lean:190
+msgid "§0 focuses the goal tagged §1.\n"
 "\n"
 "§2 tags everything it leaves behind: delayed loop clauses are\n"
 "§3, §4, …; math residuals are §5, §6, §7, §8,\n"
-"§9. So §10 answers the walker's request for an invariant,\n"
-"and §11 picks out the return-value goal for special treatment\n"
-"before an §12 sweep."
+"§9 — and when several residuals would share a tag, the first keeps the\n"
+"bare name and the rest are numbered (§10, §11, …), so each\n"
+"one has its own address. §12 answers the walker's request for\n"
+"an invariant, and §13 picks out the return-value goal for\n"
+"special treatment before an §14 sweep."
 msgstr ""
 
 #. §0: `exact e`
 #. §1: `e`
 #. §2: `inv1 : Int → Int → Prop`
 #. §3: `exact fun total i => 0 ≤ i ∧ …`
-#: Game/Doc.lean:161
+#: Game/Doc.lean:201
 msgid "§0 closes the goal with the term §1, exactly.\n"
 "\n"
 "In this world you mostly use it to *hand over data*: a delayed clause goal\n"
@@ -328,7 +401,7 @@ msgstr ""
 #. §5: `obtain rfl : i' = n + 1
 #. := by omega`
 #. §6: `grind`
-#: Game/Doc.lean:169
+#: Game/Doc.lean:209
 msgid "§0 proves §1 on the side and destructs it into\n"
 "the pattern §2 — and the pattern §3 means: the proof is an equation,\n"
 "*substitute it everywhere*.\n"
@@ -341,7 +414,7 @@ msgstr ""
 #. §0: `rfl`
 #. §1: `a = a`
 #. §2: `obtain rfl : x = e := by …`
-#: Game/Doc.lean:179
+#: Game/Doc.lean:219
 msgid "§0 proves goals of the form §1 — both sides identical up to\n"
 "computation.\n"
 "\n"
@@ -354,28 +427,20 @@ msgstr ""
 #. §1: `have h : P := by tac`
 #. §2: `h : P`
 #. §3: `py_prove`
-#. §4: `PyInt`
-#. §5: `omega`
-#. §6: `have hn2 : (2 : Int) ≤ n := hn`
-#. §7: `Int`
-#. §8: `omega`
-#: Game/Doc.lean:187
+#: Game/Doc.lean:227
 msgid "§0 (or §1) adds a proved fact §2\n"
 "to the context.\n"
 "\n"
-"House uses, in order of appearance: **staging** — pull the pieces of an\n"
-"argument into the context one line at a time (a run fact proved by\n"
-"§3, the division-algorithm bounds, a determinism equation), then let\n"
-"a finisher sweep the assembled facts; and **rebranding** — a hypothesis\n"
-"stated over §4 (the brand on statement binders) can be invisible to\n"
-"§5, and §6 restates it at §7 — same\n"
-"proof, now §8-visible."
+"Its house use is **staging**: pull the pieces of an argument into the\n"
+"context one line at a time (a run fact proved by §3, the\n"
+"division-algorithm bounds, a determinism equation), then let a finisher\n"
+"sweep the assembled facts."
 msgstr ""
 
 #. §0: `rw [h₁, h₂, …]`
 #. §1: `rw [← h]`
 #. §2: `gcd_fmod_step`
-#: Game/Doc.lean:199
+#: Game/Doc.lean:236
 msgid "§0 rewrites the goal left-to-right with the given\n"
 "equations; §1 rewrites right-to-left.\n"
 "\n"
@@ -393,7 +458,7 @@ msgstr ""
 #. §6: `\"mod\"`
 #. §7: `f(args…) ⇓ r`
 #. §8: `⇓`
-#: Game/Doc.lean:207
+#: Game/Doc.lean:244
 msgid "§0 — **total correctness**, the game's main judgment: the\n"
 "Python call terminates and returns §1. Formally §2:\n"
 "*there exists* a fuel making the verified interpreter return §3. The\n"
@@ -410,7 +475,7 @@ msgstr ""
 #. §3: `.zeroDivisionError`
 #. §4: `7 % 0`
 #. §5: `ZeroDivisionError`
-#: Game/Doc.lean:217
+#: Game/Doc.lean:254
 msgid "§0 — **exceptions as specified behavior**: the call\n"
 "terminates by *raising* §1 (a §2, e.g. §3). Runtime\n"
 "errors in the semantic tier are real and faithful — §4 doesn't “go\n"
@@ -427,7 +492,7 @@ msgstr ""
 #. §6: `==>`
 #. §7: `⇓`
 #. §8: `CallsTo.typed_int_eq`
-#: Game/Doc.lean:224
+#: Game/Doc.lean:261
 msgid "§0 — the **result-binding arrow**: exactly the same judgment\n"
 "as §1, written in *hypothesis position*. A hypothesis\n"
 "§2 reads: “the call terminated, and §3 names\n"
@@ -445,7 +510,7 @@ msgstr ""
 #. §2: `py_check`
 #. §3: `py_corollary`
 #. §4: `-3 = -4`
-#: Game/Doc.lean:236
+#: Game/Doc.lean:273
 msgid "§0 — **determinism**\n"
 "of the verified interpreter, on the typed surface: one call cannot return\n"
 "two different integers. Feed it two descriptions of the same run — typically\n"
@@ -469,7 +534,7 @@ msgstr ""
 #. §2: `Module`
 #. §3: `py_prove`
 #. §4: `py_simp`
-#: Game/Doc.lean:247
+#: Game/Doc.lean:284
 msgid "The loaded program §0 — the game's opening act:\n"
 "\n"
 "§1\n"
@@ -485,7 +550,7 @@ msgstr ""
 #. def add(a, b):
 #.     return a + b
 #. ```
-#: Game/Doc.lean:263
+#: Game/Doc.lean:300
 msgid "The loaded program §0 — two arguments, one §1:\n"
 "\n"
 "§2"
@@ -497,7 +562,7 @@ msgstr ""
 #.     return (a + b) // 2
 #. ```
 #. §2: `//`
-#: Game/Doc.lean:272
+#: Game/Doc.lean:309
 msgid "The loaded program §0:\n"
 "\n"
 "§1\n"
@@ -513,7 +578,7 @@ msgstr ""
 #.         return -x
 #.     return x
 #. ```
-#: Game/Doc.lean:282
+#: Game/Doc.lean:319
 msgid "The loaded program §0 — one §1, two branches:\n"
 "\n"
 "§2"
@@ -528,7 +593,7 @@ msgstr ""
 #.     return a % b
 #. ```
 #. §2: `arith.mod(7, 0)`
-#: Game/Doc.lean:293
+#: Game/Doc.lean:330
 msgid "The loaded module §0 — a grab bag of one-liners; the game uses:\n"
 "\n"
 "§1\n"
@@ -547,7 +612,7 @@ msgstr ""
 #. ```
 #. §2: `if`
 #. §3: `py_prove`
-#: Game/Doc.lean:306
+#: Game/Doc.lean:343
 msgid "The loaded program §0 — the boss of Straight-Line World:\n"
 "\n"
 "§1\n"
@@ -561,7 +626,7 @@ msgstr ""
 #. §3: `args`
 #. §4: `fuel`
 #. §5: `py_simp`
-#: Game/Doc.lean:320
+#: Game/Doc.lean:357
 msgid "§0 — **the verified interpreter**: an\n"
 "executable Lean definition that runs function §1 of module §2 on §3\n"
 "with a step budget of §4. Every judgment in this game unfolds to a\n"
@@ -581,7 +646,7 @@ msgstr ""
 #. §9: `Int.fdiv`
 #. §10: `//`
 #. §11: `Int.fdiv`
-#: Game/Doc.lean:327
+#: Game/Doc.lean:364
 msgid "§0 — **floor division**, rounding toward −∞. This is what\n"
 "Python's §1 *actually does*: §2 in Python, not §3.\n"
 "\n"
@@ -598,7 +663,7 @@ msgstr ""
 #. §3: `py_corollary`
 #. §4: `Int.fdiv`
 #. §5: `/`
-#: Game/Doc.lean:336
+#: Game/Doc.lean:373
 msgid "§0 — the bridge between Python's floor division and Lean's §1\n"
 "(Euclidean division): they agree whenever the *divisor* is nonnegative (here,\n"
 "§2). Feed it to §3 as a value rewrite to restate an §4\n"
@@ -620,7 +685,7 @@ msgstr ""
 #. §12: `//`
 #. §13: `%`
 #. §14: `Int.fmod`
-#: Game/Doc.lean:343
+#: Game/Doc.lean:380
 msgid "§0 — **Python's §1**: the remainder whose sign follows the\n"
 "*divisor* (§2 in Python, and §3). It is the\n"
 "partner of §4 in the division algorithm: quotient §5,\n"
@@ -634,7 +699,7 @@ msgstr ""
 #. §2: `Int.fmod_lt_of_pos`
 #. §3: `//`
 #. §4: `%`
-#: Game/Doc.lean:351
+#: Game/Doc.lean:388
 msgid "§0 — **the division\n"
 "algorithm**, in Python's dialect: floor-remainder plus floor-quotient times\n"
 "divisor reassembles the dividend. This single equation, together with the\n"
@@ -648,7 +713,7 @@ msgstr ""
 #. §2: `-7 % 2 == 1`
 #. §3: `Int.fmod_lt_of_pos`
 #. §4: `Int.fmod_nonneg`
-#: Game/Doc.lean:359
+#: Game/Doc.lean:396
 msgid "§0 — for a\n"
 "*positive divisor*, Python's §1 is never negative, whatever the sign of the\n"
 "dividend (§2 in Python). One half of the remainder's range; the\n"
@@ -659,7 +724,7 @@ msgstr ""
 #. §0: `rfl : a = a`
 #. §1: `a = a`
 #. §2: `obtain rfl : x = e := by …`
-#: Game/Doc.lean:366
+#: Game/Doc.lean:403
 msgid "§0 — the proof that anything equals itself, computation\n"
 "included.\n"
 "\n"
@@ -673,7 +738,7 @@ msgstr ""
 #. §2: `(inv := fun (total i : Int) => …)`
 #. §3: `PyInt`
 #. §4: `Int`
-#: Game/Doc.lean:374
+#: Game/Doc.lean:411
 msgid "§0 — Lean's arbitrary-precision integers, the type your *invariants*\n"
 "speak.\n"
 "\n"
@@ -689,7 +754,7 @@ msgstr ""
 #. §2: `gcd`
 #. §3: `a, b = b, a % b`
 #. §4: `Int.gcd a b`
-#: Game/Doc.lean:384
+#: Game/Doc.lean:421
 msgid "§0 — the greatest common divisor, as a spec-side function\n"
 "(always nonnegative; §1). This is the *mathematical*\n"
 "yardstick the Python §2 program is measured against — the program shuffles\n"
@@ -708,7 +773,7 @@ msgstr ""
 #.     return total
 #. ```
 #. §3: `1 + 3 + 5 + ⋯`
-#: Game/Doc.lean:390
+#: Game/Doc.lean:427
 msgid "The loaded program §0 — sums the first §1 odd numbers:\n"
 "\n"
 "§2\n"
@@ -729,7 +794,7 @@ msgstr ""
 #. §2: `n`
 #. §3: `n`
 #. §4: `N`
-#: Game/Doc.lean:406
+#: Game/Doc.lean:443
 msgid "The loaded program §0 — triangular numbers again, but counting\n"
 "**down**, mutating its own argument:\n"
 "\n"
@@ -752,7 +817,7 @@ msgstr ""
 #. §3: `Int.fmod`
 #. §4: `%`
 #. §5: `gcd_fmod_step`
-#: Game/Doc.lean:424
+#: Game/Doc.lean:461
 msgid "The loaded program §0 — Euclid's algorithm, verbatim:\n"
 "\n"
 "§1\n"
@@ -785,7 +850,7 @@ msgstr ""
 #. §7: `m == 0`
 #. §8: `i`
 #. §9: `n`
-#: Game/Doc.lean:438
+#: Game/Doc.lean:475
 msgid "The loaded module §0 — the final boss's lair:\n"
 "\n"
 "§1\n"
@@ -804,7 +869,7 @@ msgstr ""
 #. §5: `Int.gcd 4 (-6) = 2`
 #. §6: `4 % -6`
 #. §7: `-2`
-#: Game/Doc.lean:461
+#: Game/Doc.lean:498
 msgid "§0\n"
 "— Euclid's step in the exact shape the interpreter emits: Python's §1 is\n"
 "§2, and swapping §3 preserves the gcd. This is\n"
@@ -817,7 +882,7 @@ msgstr ""
 #. §0: `Int.fmod_nonneg : 0 ≤ a → 0 ≤ b → 0 ≤ a.fmod b`
 #. §1: `%`
 #. §2: `gcd`
-#: Game/Doc.lean:470
+#: Game/Doc.lean:507
 msgid "§0 — Python's §1 never\n"
 "goes negative when both operands are nonnegative. Keeps the §2 loop\n"
 "invariant's range conjuncts alive across an iteration."
@@ -825,7 +890,7 @@ msgstr ""
 
 #. §0: `Int.fmod_lt_of_pos : ∀ (a : Int), 0 < b → a.fmod b < b`
 #. §1: `b.toNat`
-#: Game/Doc.lean:475
+#: Game/Doc.lean:512
 msgid "§0 — the remainder\n"
 "is strictly smaller than a positive divisor. This is why Euclid *terminates*:\n"
 "the measure §1 strictly drops each iteration."
@@ -835,7 +900,7 @@ msgstr ""
 #. §1: `b = 0`
 #. §2: `|a|`
 #. §3: `gcd`
-#: Game/Doc.lean:480
+#: Game/Doc.lean:517
 msgid "§0 — when the loop is done\n"
 "(§1), the gcd is just §2. The last algebraic step of the §3\n"
 "proof."
@@ -844,7 +909,7 @@ msgstr ""
 #. §0: `Int.natAbs_of_nonneg : 0 ≤ a → ↑a.natAbs = a`
 #. §1: `gcd_zero_right`
 #. §2: `gcd`
-#: Game/Doc.lean:485
+#: Game/Doc.lean:522
 msgid "§0 — drop the absolute value\n"
 "when the sign is known. Pairs with §1 to finish the §2\n"
 "return goal."
@@ -1080,8 +1145,10 @@ msgid "Same module, its sibling function:\n"
 "§3? §4?\n"
 "\n"
 "Look at the goal: §5 is now a **variable** — §6 means *every*\n"
-"Python integer at once. §7 is useless here: there is nothing concrete\n"
-"to run. You cannot run infinitely many test cases.\n"
+"Python integer at once. §7 is no use here, and it knows it: try it,\n"
+"and it refuses on sight — a free variable means there is nothing concrete to\n"
+"run, and it tells you whose territory you've crossed into. You cannot run\n"
+"infinitely many test cases.\n"
 "\n"
 "You need *symbolic execution*: walk the interpreter through the body with §8\n"
 "left abstract. The tactic §9 does exactly that — pass it the\n"
@@ -1093,7 +1160,7 @@ msgstr ""
 
 #. §0: `arith.floordiv(a, 0) ==>! .zeroDivisionError`
 #. §1: `a`
-#: Game/Levels/MachineWorld/L04_SymbolicBridge.lean:33
+#: Game/Levels/MachineWorld/L04_SymbolicBridge.lean:35
 msgid "§0 for **every** integer §1\n"
 "— the first symbolic statement: infinitely many crashes, one proof."
 msgstr ""
@@ -1103,7 +1170,7 @@ msgstr ""
 #. §2: `a`
 #. §3: `0`
 #. §4: `ZeroDivisionError`
-#: Game/Levels/MachineWorld/L04_SymbolicBridge.lean:37
+#: Game/Levels/MachineWorld/L04_SymbolicBridge.lean:39
 msgid "For **every** integer §0, running §1 on §2 and §3 terminates\n"
 "by raising §4."
 msgstr ""
@@ -1112,7 +1179,7 @@ msgstr ""
 #. §1: `a // 0`
 #. §2: `a`
 #. §3: `a`
-#: Game/Levels/MachineWorld/L04_SymbolicBridge.lean:43
+#: Game/Levels/MachineWorld/L04_SymbolicBridge.lean:45
 msgid "One tactic, infinitely many crashes.\n"
 "\n"
 "§0 committed a fuel budget, symbolically executed §1 with §2\n"
@@ -1651,52 +1718,70 @@ msgid "§0 — absurd, C refuted, arc closed: **named** (§1),\n"
 "turns §5 into §6, that is not a folklore gotcha —\n"
 "it is the negation of a theorem you have proved.\n"
 "\n"
-"Back to the regular program: preconditions."
+"Back to the regular program: cashing proved runs into prettier statements."
 msgstr ""
 
-#: Game/Levels/StraightLineWorld/L05_MidpointNonneg.lean:8
-msgid "Preconditions are hypotheses"
+#: Game/Levels/StraightLineWorld/L05_MidpointDiv.lean:8
+msgid "The strongest honest statement"
 msgstr ""
 
 #. §0: `midpoint`
 #. §1: `Int.fdiv`
 #. §2: `(a + b) / 2`
 #. §3: `/`
-#. §4: `ha : 0 ≤ a`
-#. §5: `hb : 0 ≤ b`
-#. §6: `0 ≤ a`
-#. §7: `midpoint_spec`
-#. §8: `Int.fdiv (a + b) 2`
-#. §9: `Int.fdiv (a + b) 2 = (a + b) / 2`
-#. §10: `Int.fdiv_eq_ediv_of_nonneg`
-#. §11: `py_corollary [thm, rewrites…]`
-#: Game/Levels/StraightLineWorld/L05_MidpointNonneg.lean:10
+#. §4: `/`
+#. §5: `Int`
+#. §6: `2`
+#. §7: `a`
+#. §8: `b`
+#. §9: `0 ≤ a`
+#. §10: `0 ≤ b`
+#. §11: `0 < b`
+#. §12: `0 ≤ n`
+#. §13: `midpoint_spec`
+#. §14: `Int.fdiv (a + b) 2`
+#. §15: `Int.fdiv (a + b) 2 = (a + b) / 2`
+#. §16: `Int.fdiv_eq_ediv_of_nonneg`
+#. §17: `2`
+#. §18: `py_corollary [thm, rewrites…]`
+#: Game/Levels/StraightLineWorld/L05_MidpointDiv.lean:10
 msgid "Clients of §0 don't want to read §1. They want the pretty\n"
-"form §2 — and they're entitled to it *when it's true*: floor\n"
-"division and Lean's §3 agree once the operands behave, and here the goal\n"
-"hands you §4 and §5.\n"
+"form §2, in Lean's own §3. Is that even true? Lean's §4 on\n"
+"§5 is *Euclidean* division — a third convention for your zoo — but for a\n"
+"**positive divisor**, Euclidean and floor division agree exactly, and the\n"
+"divisor here is the literal §6. So the pretty form holds for *every* §7\n"
+"and §8. No fine print.\n"
 "\n"
-"That's the whole convention for preconditions in this framework: **they are\n"
-"ordinary hypotheses**. No special contract language — §6 sits to the\n"
-"left of the turnstile like any other fact.\n"
+"Which settles what the theorem must say. You might be tempted to guard it —\n"
+"§9, §10, “midpoints of nonnegative things” — but a hypothesis the\n"
+"proof never uses is dead weight in the statement's teeth: it weakens the\n"
+"theorem and documents a dependency that does not exist. The house rule has\n"
+"two halves: **preconditions are ordinary hypotheses** — no special contract\n"
+"language, they sit to the left of the turnstile like any other fact — and\n"
+"**you state exactly the load-bearing ones**. You've already leaned on a real\n"
+"one: §11 in “Floor means floor” fed the division algorithm. Loop World's\n"
+"first theorem will genuinely need §12. Here, the honest statement takes\n"
+"none.\n"
 "\n"
 "Now, how to prove it? You could re-run the program symbolically… but you\n"
-"already own §7 (check your inventory!). It pins the returned\n"
-"value to §8; the only new content is *arithmetic*:\n"
-"§9 under the sign hypotheses — which is\n"
-"exactly the library lemma §10.\n"
+"already own §13 (check your inventory!). It pins the returned\n"
+"value to §14; the only new content is *arithmetic*:\n"
+"§15 — which is exactly the library lemma\n"
+"§16, at divisor §17.\n"
 "\n"
-"§11 packages this move: derive a corollary of a\n"
+"§18 packages this move: derive a corollary of a\n"
 "proved run-theorem by *rewriting its value*, never re-executing the program."
 msgstr ""
 
 #. §0: `midpoint(a, b) ==> (a + b) / 2`
-#. §1: `0 ≤ a`
-#. §2: `0 ≤ b`
-#. §3: `midpoint_spec`
-#: Game/Levels/StraightLineWorld/L05_MidpointNonneg.lean:30
-msgid "§0 under §1, §2 — the pretty\n"
-"corollary of §3, derived by value rewriting, not re-execution."
+#. §1: `midpoint_spec`
+#. §2: `/`
+#. §3: `2`
+#: Game/Levels/StraightLineWorld/L05_MidpointDiv.lean:39
+msgid "§0 for **all** integers — the pretty\n"
+"corollary of §1, derived by value rewriting, not re-execution.\n"
+"Unconditional, because Lean's §2 (Euclidean division) agrees with floor\n"
+"division whenever the divisor is positive — and the divisor is §3."
 msgstr ""
 
 #. §0: `a`
@@ -1705,34 +1790,36 @@ msgstr ""
 #. §3: `(a + b) / 2`
 #. §4: `/`
 #. §5: `midpoint_spec`
-#: Game/Levels/StraightLineWorld/L05_MidpointNonneg.lean:34
-msgid "For nonnegative §0 and §1, §2 terminates and returns\n"
-"§3 — the pretty §4 form, earned from §5 plus\n"
-"arithmetic, without re-running the program."
+#: Game/Levels/StraightLineWorld/L05_MidpointDiv.lean:45
+msgid "For every §0 and §1, §2 terminates and returns §3 —\n"
+"the pretty §4 form, earned from §5 plus arithmetic, without\n"
+"re-running the program."
 msgstr ""
 
 #. §0: `midpoint_spec`
 #. §1: `/`
 #. §2: `py_corollary [midpoint_spec, Int.fdiv_eq_ediv_of_nonneg]`
-#: Game/Levels/StraightLineWorld/L05_MidpointNonneg.lean:39
+#: Game/Levels/StraightLineWorld/L05_MidpointDiv.lean:49
 msgid "Don't re-execute anything. Bridge the value of §0 to the\n"
 "§1 form: §2."
 msgstr ""
 
-#. §0: `/`
-#. §1: `Int`
-#. §2: `ha`
-#. §3: `hb`
-#. §4: `2`
-#: Game/Levels/StraightLineWorld/L05_MidpointNonneg.lean:43
+#. §0: `0 ≤ a`
+#. §1: `0 ≤ b`
+#. §2: `midpoint(3, -4) ==> -1`
+#. §3: `Int.fdiv_eq_ediv_of_nonneg`
+#. §4: `0 ≤ b`
+#: Game/Levels/StraightLineWorld/L05_MidpointDiv.lean:53
 msgid "One proof ran the program; every corollary after it is pure mathematics.\n"
 "\n"
-"Full-disclosure footnote, in the spirit of this framework: on this toolchain\n"
-"§0 on §1 is *Euclidean* division, which already agrees with floor division\n"
-"for any **positive divisor** — so §2 and §3 aren't load-bearing for\n"
-"divisor §4. The statement keeps them because it's the honest, portable\n"
-"contract for the pretty form. Specs are promises to readers, not just to the\n"
-"kernel."
+"And note which way the honesty cut: *dropping* the tempting §0, §1\n"
+"guards made the theorem stronger — the pretty form covers\n"
+"§2 too, the very run that tripped you in Machine\n"
+"World. The agreement is genuinely conditional only when the **divisor** goes\n"
+"symbolic — §3 demands §4 for a reason — and\n"
+"the day a hypothesis is load-bearing, it goes back in. Specs are promises to\n"
+"readers: promise exactly what is true, under exactly the assumptions it\n"
+"needs."
 msgstr ""
 
 #: Game/Levels/StraightLineWorld/L06_MyAbs.lean:8
@@ -1830,20 +1917,23 @@ msgstr ""
 #. §4: `split`
 #. §5: `py_prove [ag_clamp01]`
 #. §6: `if`
-#. §7: `refine ⟨32, ?_⟩`
-#. §8: `py_check`
-#. §9: `py_prove`
-#. §10: `⟨_, ?_⟩`
-#. §11: `by_cases h1 : x < 0`
-#. §12: `by_cases h2 : 1 < x`
-#. §13: `py_simp [callFunction, ag_clamp01, h1, h2]`
-#. §14: `grind`
-#. §15: `omega`
-#. §16: `by_cases`
-#. §17: `PyInt`
+#. §7: `==>`
+#. §8: `⟨…, …⟩`
+#. §9: `refine ⟨32, ?_⟩`
+#. §10: `32`
+#. §11: `?_`
+#. §12: `py_check`
+#. §13: `py_prove`
+#. §14: `by_cases h1 : x < 0`
+#. §15: `by_cases h2 : 1 < x`
+#. §16: `py_simp [callFunction, ag_clamp01, h1, h2]`
+#. §17: `grind`
 #. §18: `omega`
-#. §19: `grind`
-#. §20: `<;>`
+#. §19: `by_cases`
+#. §20: `PyInt`
+#. §21: `omega`
+#. §22: `grind`
+#. §23: `<;>`
 #: Game/Levels/StraightLineWorld/L07_Clamp01Boss.lean:10
 msgid "The boss of Straight-Line World:\n"
 "\n"
@@ -1851,31 +1941,39 @@ msgid "The boss of Straight-Line World:\n"
 "\n"
 "**Two sequential §1s** — and that breaks §2: its recipe splits *one*\n"
 "surviving §3; the second one gets mangled into a disjunction that §4\n"
-"can no longer attack. Try §5 if you like. It will fail.\n"
-"Automation that fails loudly at its documented boundary is a feature; now you\n"
-"get to be the automation.\n"
+"can no longer attack. Try §5 if you like: it fails *on\n"
+"purpose*, with a short note that the body left interpreter state unresolved,\n"
+"pointing at the heavier tools — not a screenful of half-digested interpreter\n"
+"state. Automation that fails politely at its documented boundary is a\n"
+"feature; now you get to be the automation.\n"
 "\n"
 "The house pattern for multi-§6 bodies:\n"
 "\n"
-"1. **Fuel**: §7 — commit a step budget by hand. (§8\n"
-"   and §9 have been donating the fuel for you all game; the §10\n"
-"   is you doing it yourself.)\n"
-"2. **Decide the branches up front**: §11, then\n"
-"   §12 — four cases, each with the tests answered.\n"
-"3. **Execute**: §13 — symbolic\n"
+"1. **Fuel — and fuel comes first.** Under every §7 goal sits an\n"
+"   existential: “*some* step budget finishes this run.” Until a concrete\n"
+"   budget is on the table there is no run to execute, so no split or\n"
+"   symbolic step can even begin — which is why this move must open the\n"
+"   proof. The §8 is the **anonymous constructor** (new in your\n"
+"   inventory): §9 supplies the witness §10 and leaves the\n"
+"   run itself open as §11. (§12 and §13 have been donating\n"
+"   the fuel for you all game; now you do it yourself.)\n"
+"2. **Decide the branches up front**: §14, then\n"
+"   §15 — four cases, each with the tests answered.\n"
+"3. **Execute**: §16 — symbolic\n"
 "   execution with your case facts resolving both tests.\n"
-"4. **Finish**: §14 — *not* §15: the §16 comparisons elaborate\n"
-"   over the §17 brand, whose head type §18 refuses to look through\n"
+"4. **Finish**: §17 — *not* §18: the §19 comparisons elaborate\n"
+"   over the §20 brand, whose head type §21 refuses to look through\n"
 "   (the same brand-blindness you met in “Floor means floor”);\n"
-"   §19 matches up to reducible unfolding and closes all four cases.\n"
+"   §22 matches up to reducible unfolding and closes all four cases.\n"
 "\n"
-"You can chain the case splits with §20 (“then, on every goal produced…”)\n"
-"and write the whole thing in one breath, or take it step by step."
+"You can chain the case splits with **§23** — “then, on every goal just\n"
+"produced…”, also new in your inventory — and write the whole thing in one\n"
+"breath, or take it step by step."
 msgstr ""
 
 #. §0: `ag_clamp01.clamp01(x) ==> max 0 (min 1 x)`
 #. §1: `py_prove`
-#: Game/Levels/StraightLineWorld/L07_Clamp01Boss.lean:46
+#: Game/Levels/StraightLineWorld/L07_Clamp01Boss.lean:54
 msgid "§0 for every integer — proved\n"
 "by hand at the documented boundary of §1's recipe."
 msgstr ""
@@ -1885,20 +1983,35 @@ msgstr ""
 #. §2: `x`
 #. §3: `[0, 1]`
 #. §4: `max 0 (min 1 x)`
-#: Game/Levels/StraightLineWorld/L07_Clamp01Boss.lean:50
+#: Game/Levels/StraightLineWorld/L07_Clamp01Boss.lean:58
 msgid "For every integer §0, running §1 terminates and returns §2\n"
 "clamped to §3 — that is, §4."
 msgstr ""
 
 #. §0: `refine ⟨32, ?_⟩`
-#: Game/Levels/StraightLineWorld/L07_Clamp01Boss.lean:53
-msgid "Step 1 — commit fuel: §0."
+#. §1: `32`
+#. §2: `?_`
+#: Game/Levels/StraightLineWorld/L07_Clamp01Boss.lean:61
+msgid "Step 1 — commit fuel, and commit it *first*: the goal is secretly an\n"
+"existential (“some fuel finishes this run”), so nothing can execute the\n"
+"body until a concrete budget is on the table. The anonymous constructor\n"
+"hands it over: §0 — witness §1, run left open as §2."
+msgstr ""
+
+#. §0: `==>`
+#. §1: `py_simp`
+#. §2: `refine ⟨32, ?_⟩`
+#: Game/Levels/StraightLineWorld/L07_Clamp01Boss.lean:67
+msgid "Splitting before donating fuel leaves both cases\n"
+"staring at the bare §0 goal — an existential (“*some* fuel finishes\n"
+"this run”) that §1 cannot open. The fuel witness has to come\n"
+"*first*: start over, open with §2, and split after."
 msgstr ""
 
 #. §0: `by_cases h1 : x < 0 <;> by_cases h2 : 1 < x <;>
 #. py_simp [callFunction, ag_clamp01, h1, h2] <;> grind`
 #. §1: `by_cases h1 : x < 0`
-#: Game/Levels/StraightLineWorld/L07_Clamp01Boss.lean:55
+#: Game/Levels/StraightLineWorld/L07_Clamp01Boss.lean:72
 msgid "Step 2 — decide both tests before executing:\n"
 "§0\n"
 "\n"
@@ -1907,7 +2020,7 @@ msgid "Step 2 — decide both tests before executing:\n"
 msgstr ""
 
 #. §0: `py_prove`
-#: Game/Levels/StraightLineWorld/L07_Clamp01Boss.lean:64
+#: Game/Levels/StraightLineWorld/L07_Clamp01Boss.lean:81
 msgid "Boss down. You just did by hand what §0 does inside — fuel, symbolic\n"
 "execution, case analysis, arithmetic — on a shape the automation honestly\n"
 "refuses.\n"
@@ -1976,21 +2089,25 @@ msgid "Unleash it: §0."
 msgstr ""
 
 #. §0: `return`
-#. §1: `hif`
-#. §2: `Val`
-#. §3: `all_goals omega`
+#. §1: `ret`
+#. §2: `ret2`
+#. §3: `ret3`
+#. §4: `hif`
+#. §5: `Val`
+#. §6: `all_goals omega`
 #: Game/Levels/StraightLineWorld/L08_MachineRises.lean:42
-msgid "Three goals, one per §0 — each is bare integer arithmetic, the\n"
-"branch facts sitting in your hypotheses as §1. No fuel, no interpreter,\n"
-"no §2 anywhere: the machine already ate all of that. Sweep them:\n"
-"§3."
+msgid "Three goals, one per §0 — tagged §1, §2, §3 (goals\n"
+"that would share a tag get numbered) — each bare integer arithmetic, the\n"
+"branch facts sitting in your hypotheses as §4. No fuel, no interpreter,\n"
+"no §5 anywhere: the machine already ate all of that. Sweep them:\n"
+"§6."
 msgstr ""
 
 #. §0: `0`
 #. §1: `0`
 #. §2: `py_vcgen`
 #. §3: `while`
-#: Game/Levels/StraightLineWorld/L08_MachineRises.lean:48
+#: Game/Levels/StraightLineWorld/L08_MachineRises.lean:49
 msgid "That was the entire boss fight, mechanized — and the arithmetic leftovers are\n"
 "*honest* leftovers: no tactic can know that §0 is the right answer below §1.\n"
 "That's mathematics about the program, and it's yours.\n"
@@ -2062,19 +2179,22 @@ msgstr ""
 #. §18: `total = 0`
 #. §19: `i = 0`
 #. §20: `preserve`
-#. §21: `hcont : i ≤ n`
-#. §22: `dec`
-#. §23: `exit`
-#. §24: `∃`
-#. §25: `grind`
-#. §26: `ret`
-#. §27: `total'`
-#. §28: `i'`
-#. §29: `hcont : n < i'`
-#. §30: `i' = n + 1`
-#. §31: `obtain rfl : i' = n + 1 := by omega`
-#. §32: `grind`
-#. §33: `grind`
+#. §21: `preserve2`
+#. §22: `hcont : i ≤ n`
+#. §23: `preserve2`
+#. §24: `case`
+#. §25: `dec`
+#. §26: `exit`
+#. §27: `∃`
+#. §28: `grind`
+#. §29: `ret`
+#. §30: `total'`
+#. §31: `i'`
+#. §32: `hcont : n < i'`
+#. §33: `i' = n + 1`
+#. §34: `obtain rfl : i' = n + 1 := by omega`
+#. §35: `grind`
+#. §36: `grind`
 #: Game/Levels/LoopWorld/L01_ReadTheProof.lean:10
 msgid "Old friend, new claim. §0 — the very first program you ever ran — and this\n"
 "time the input is **symbolic**: for every §1, §2 returns the\n"
@@ -2101,29 +2221,34 @@ msgid "Old friend, new claim. §0 — the very first program you ever ran — an
 "* §15 — the distance still to\n"
 "  travel, as a natural number.\n"
 "\n"
-"§16 opens the loop with them and leaves five *residual* goals, each\n"
+"§16 opens the loop with them and leaves six *residual* goals, each\n"
 "tagged with its role — this is the shape of every loop proof you'll ever do:\n"
 "\n"
 "* **§17** — the invariant holds on entry (§18, §19).\n"
-"* **§20** — one body pass keeps it (the test fact §21 is\n"
-"  in scope — the body only runs when the test passed).\n"
-"* **§22** — the measure strictly drops on that same pass.\n"
-"* **§23** — bookkeeping: repackage the invariant and the negated test at\n"
-"  the moment the loop ends (a goal full of §24s; §25 eats it whole).\n"
-"* **§26** — the payout: primed variables §27, §28 are the values *at\n"
-"  the exit*, and the invariant plus §29 must force the returned\n"
+"* **§20** and **§21** — one body pass keeps the invariant\n"
+"  (the test fact §22 is in scope — the body only runs when the\n"
+"  test passed). Preservation splits along the invariant's conjuncts; the\n"
+"  walker closes what it can on the spot and leaves two — the range floor\n"
+"  and the books. When goals share a tag, the walker numbers them: the first\n"
+"  keeps the bare tag, the second becomes §23, so each has its own\n"
+"  §24 address.\n"
+"* **§25** — the measure strictly drops on that same pass.\n"
+"* **§26** — bookkeeping: repackage the invariant and the negated test at\n"
+"  the moment the loop ends (a goal full of §27s; §28 eats it whole).\n"
+"* **§29** — the payout: primed variables §30, §31 are the values *at\n"
+"  the exit*, and the invariant plus §32 must force the returned\n"
 "  value. This one is handled first below: the range conjuncts and the negated\n"
-"  test pin §30 (§31 proves that\n"
+"  test pin §33 (§34 proves that\n"
 "  equation and substitutes it everywhere), and the remaining division algebra\n"
-"  falls to §32.\n"
+"  falls to §35.\n"
 "\n"
 "Your job this level: fill the two holes — both are one word, and the word is\n"
-"§33."
+"§36."
 msgstr ""
 
 #. §0: `tri(n) ==> n * (n + 1) / 2`
 #. §1: `n ≥ 0`
-#: Game/Levels/LoopWorld/L01_ReadTheProof.lean:63
+#: Game/Levels/LoopWorld/L01_ReadTheProof.lean:68
 msgid "§0 for every §1 — the game's first loop\n"
 "theorem: one invariant and one measure cover *every* number of iterations at\n"
 "once."
@@ -2132,14 +2257,14 @@ msgstr ""
 #. §0: `n ≥ 0`
 #. §1: `tri`
 #. §2: `n * (n + 1) / 2`
-#: Game/Levels/LoopWorld/L01_ReadTheProof.lean:68
+#: Game/Levels/LoopWorld/L01_ReadTheProof.lean:73
 msgid "For every integer §0, running §1 terminates and returns the\n"
 "triangular number §2 — infinitely many loop iterations\n"
 "covered by one invariant."
 msgstr ""
 
 #. §0: `while`
-#: Game/Levels/LoopWorld/L01_ReadTheProof.lean:81
+#: Game/Levels/LoopWorld/L01_ReadTheProof.lean:86
 msgid "Read the goals you just watched close, once more, in prose: *it holds at the\n"
 "door, every lap keeps it, every lap shortens the road, and at the exit it\n"
 "pays out.* That's the whole theory of §0.\n"
@@ -2375,16 +2500,17 @@ msgid "Loop variables: §0 and §1 (both assigned in the body; §2\n"
 msgstr ""
 
 #. §0: `grind`
-#. §1: `¬ k' < n`
-#. §2: `k' ≤ n`
-#. §3: `grind`
-#. §4: `k' = n`
-#. §5: `total' = k' * k'`
-#. §6: `all_goals grind`
+#. §1: `ret`
+#. §2: `¬ k' < n`
+#. §3: `k' ≤ n`
+#. §4: `grind`
+#. §5: `k' = n`
+#. §6: `total' = k' * k'`
+#. §7: `all_goals grind`
 #: Game/Levels/LoopWorld/L03_OddSum.lean:58
-msgid "All four residuals are §0-shaped this time — even the exit: from\n"
-"§1 and §2, §3 pins §4 and rewrites\n"
-"§5 into the goal. Sweep: §6."
+msgid "All five residuals are §0-shaped this time — even the §1\n"
+"payout: from §2 and §3, §4 pins §5 and rewrites\n"
+"§6 into the goal. Sweep: §7."
 msgstr ""
 
 #. §0: `1 + 3 + 5 + ⋯ + (2n−1) = n²`
@@ -2505,12 +2631,19 @@ msgid "Exit first: §0, then\n"
 "§1 for the division. The rest: §2."
 msgstr ""
 
+#. §0: `N`
+#. §1: `private`
+#. §2: `n`
+#. §3: `N`
 #: Game/Levels/LoopWorld/L04_SumTo.lean:71
 msgid "The shadowing rule in one line: **clause binders belong to the loop; the\n"
 "theorem owns everything else** — so when Python mutates its own argument,\n"
-"rename at the theorem and keep the Python names for the clauses. (This is\n"
-"exactly how the lean-surfaces gallery states this theorem, for exactly this\n"
-"reason.)\n"
+"rename at the theorem and keep the Python names for the clauses. (The\n"
+"lean-surfaces gallery makes the same move for the same reason, with one\n"
+"wrinkle of packaging: it proves the capital-§0 statement as a §1\n"
+"core lemma and re-exports it through a public wrapper whose binder is plain\n"
+"lowercase §2 — so its *published* statement hides the rename. The game\n"
+"keeps the honest capital §3 in view.)\n"
 "\n"
 "Next: the oldest algorithm in the book, and an invariant that isn't\n"
 "bookkeeping — it's a *theorem about numbers*."
@@ -2537,23 +2670,29 @@ msgstr ""
 #. §9: `Int.fmod`
 #. §10: `%`
 #. §11: `Int.fmod`
-#. §12: `·`
-#. §13: `b = 0`
-#. §14: `a`
-#. §15: `Int.gcd a 0 = a.natAbs`
-#. §16: `exit`
-#. §17: `Int.fmod_nonneg`
-#. §18: `gcd_fmod_step`
-#. §19: `Int.fmod_lt_of_pos`
-#. §20: `Int.fmod_nonneg`
-#. §21: `max`
-#. §22: `omega`
-#. §23: `grind`
-#. §24: `Int.gcd_zero_right`
-#. §25: `Int.natAbs_of_nonneg`
-#. §26: `Int.gcd 4 (-6) = 2`
-#. §27: `4 % -6 == -2`
-#. §28: `0 ≤ a ∧ 0 ≤ b`
+#. §12: `case`
+#. §13: `case preserve2`
+#. §14: `exit`
+#. §15: `b = 0`
+#. §16: `a`
+#. §17: `Int.gcd a 0 = a.natAbs`
+#. §18: `exit`
+#. §19: `⟨…⟩`
+#. §20: `preserve`
+#. §21: `Int.fmod_nonneg`
+#. §22: `preserve2`
+#. §23: `gcd_fmod_step`
+#. §24: `dec`
+#. §25: `Int.fmod_lt_of_pos`
+#. §26: `Int.fmod_nonneg`
+#. §27: `max`
+#. §28: `omega`
+#. §29: `ret`
+#. §30: `grind [Int.gcd_zero_right, Int.natAbs_of_nonneg]`
+#. §31: `grind`
+#. §32: `Int.gcd 4 (-6) = 2`
+#. §33: `4 % -6 == -2`
+#. §34: `0 ≤ a ∧ 0 ≤ b`
 #: Game/Levels/LoopWorld/L05_Gcd.lean:10
 msgid "The oldest algorithm with a name, verbatim:\n"
 "\n"
@@ -2570,32 +2709,34 @@ msgid "The oldest algorithm with a name, verbatim:\n"
 "§6\n"
 "\n"
 "with measure §7 (the remainder strictly shrinks). The residuals this\n"
-"time are *number theory*, and §8 alone won't carry them — you'll close\n"
+"time are *number theory*, and a bare §8 won't carry them — you'll close\n"
 "them one by one with the spec-side library (part fresh in your inventory,\n"
 "part carried since “Floor means floor”, all stated over §9, because\n"
-"Python's §10 *is* §11). In walk order, with §12 focusing each goal:\n"
+"Python's §10 *is* §11). Five goals, each with its own §12 tag —\n"
+"preservation splits in two, and same-tag goals get numbered, so the second\n"
+"one answers to §13:\n"
 "\n"
-"1. **exit** — package the answer at §13: witness the final §14, then\n"
-"   §15 closes it. Given below — read it, it's the\n"
-"   shape from L1's §16, by hand.\n"
-"2. **preserve, part 1** — the new remainder is nonnegative:\n"
-"   §17.\n"
-"3. **preserve, part 2** — the gcd survives the swap: rewrite with\n"
-"   §18 (that *is* Euclid's lemma), then the old invariant.\n"
-"4. **dec** — the remainder shrinks: §19, plus\n"
-"   §20 to clear the §21, then §22.\n"
-"5. **ret** — cash out: §23 with §24 and\n"
-"   §25.\n"
+"1. **§14** — package the answer at §15: witness the final §16, then\n"
+"   §17 closes it. Given in the editor — read it, it's\n"
+"   the shape from L1's §18, written by hand with the anonymous\n"
+"   constructor §19.\n"
+"2. **§20** — the new remainder is nonnegative: §21.\n"
+"3. **§22** — the gcd survives the swap: rewrite with\n"
+"   §23 (that *is* Euclid's lemma), then the old invariant.\n"
+"4. **§24** — the remainder shrinks: §25, plus\n"
+"   §26 to clear the §27, then §28.\n"
+"5. **§29** — cash out: §30\n"
+"   — the brackets hand §31 the two theorems as extra ammunition.\n"
 "\n"
-"The sign hypotheses on those lemmas are not decoration — §26\n"
-"but Python computes §27 (CPython agrees; it's in the differential\n"
-"test suite). Your §28 conjuncts are what feed them."
+"The sign hypotheses on those lemmas are not decoration — §32\n"
+"but Python computes §33 (CPython agrees; it's in the differential\n"
+"test suite). Your §34 conjuncts are what feed them."
 msgstr ""
 
 #. §0: `gcd(A, B) ==> Int.gcd A B`
 #. §1: `A, B ≥ 0`
 #. §2: `Int.gcd a b`
-#: Game/Levels/LoopWorld/L05_Gcd.lean:53
+#: Game/Levels/LoopWorld/L05_Gcd.lean:55
 msgid "§0 for all §1 — Euclid's algorithm\n"
 "returns the greatest common divisor, via the invariant that is Euclid's\n"
 "lemma itself: §2 never changes."
@@ -2604,16 +2745,64 @@ msgstr ""
 #. §0: `A, B ≥ 0`
 #. §1: `gcd`
 #. §2: `Int.gcd A B`
-#: Game/Levels/LoopWorld/L05_Gcd.lean:58
+#: Game/Levels/LoopWorld/L05_Gcd.lean:60
 msgid "For all integers §0, running §1 terminates and returns\n"
 "§2. The invariant: the running pair always has the *original*\n"
 "gcd."
 msgstr ""
 
+#. §0: `exit`
+#. §1: `⟨…⟩`
+#. §2: `a`
+#. §3: `rfl`
+#. §4: `hx`
+#. §5: `hcore.1`
+#. §6: `by rw [...]`
+#. §7: `case preserve`
+#. §8: `case preserve2`
+#. §9: `case dec`
+#. §10: `case ret`
+#: Game/Levels/LoopWorld/L05_Gcd.lean:69
+msgid "Five tagged goals. The §0 one is written out for you in the\n"
+"editor — read its §1 term: witness the final §2, hand over the exit\n"
+"facts (§3, §4), the range fact §5, and a §6 for\n"
+"the last algebra. The other four are yours, each by name:\n"
+"§7, §8 (same-tag goals get numbered),\n"
+"§9, §10."
+msgstr ""
+
+#. §0: `Int.fmod`
+#. §1: `Int.fmod_nonneg hinv1 hinv2`
+#. §2: `exact`
+#. §3: `case preserve2`
+#. §4: `rw [gcd_fmod_step hinv1 hinv2]`
+#. §5: `hinv3`
+#. §6: `case dec`
+#. §7: `Int.fmod_lt_of_pos`
+#. §8: `Int.fmod_nonneg`
+#. §9: `have`
+#. §10: `omega`
+#: Game/Levels/LoopWorld/L05_Gcd.lean:78
+msgid "The §0 kit, by name: this goal *is*\n"
+"§1 — §2 it. Next door, §3\n"
+"wants §4 and then the old invariant\n"
+"§5; and §6 wants §7 and\n"
+"§8 staged with §9, then §10."
+msgstr ""
+
+#. §0: `grind`
+#. §1: `grind [Int.gcd_zero_right, Int.natAbs_of_nonneg]`
+#: Game/Levels/LoopWorld/L05_Gcd.lean:92
+msgid "A bare §0 stalls here — it needs the two\n"
+"payout theorems as ammunition, in brackets:\n"
+"§1."
+msgstr ""
+
 #. §0: `gcd_fmod_step`
 #. §1: `%`
-#: Game/Levels/LoopWorld/L05_Gcd.lean:76
-msgid "Twenty-three centuries later, Euclid's argument types out in five bullets.\n"
+#: Game/Levels/LoopWorld/L05_Gcd.lean:97
+msgid "Twenty-three centuries later, Euclid's argument types out in five tagged\n"
+"goals.\n"
 "\n"
 "Notice what the proof did *not* contain: a single unfolding of the\n"
 "interpreter. The walker ate the semantics; you supplied mathematics —\n"
@@ -2677,9 +2866,16 @@ msgstr ""
 #. §34: `break`
 #. §35: `m < i`
 #. §36: `i`
-#. §37: `omega`
-#. §38: `have hn2 : (2 : Int) ≤ n := hn`
-#. §39: `all_goals grind`
+#. §37: `py_vcgen [nested_flow]`
+#. §38: `inv1`
+#. §39: `dec1`
+#. §40: `inv2`
+#. §41: `dec2`
+#. §42: `exit2`
+#. §43: `break`
+#. §44: `all_goals grind`
+#. §45: `grind`
+#. §46: `hn`
 #: Game/Levels/LoopWorld/L06_NestedBoss.lean:10
 msgid "The final boss guards three shapes at once:\n"
 "\n"
@@ -2716,13 +2912,15 @@ msgid "The final boss guards three shapes at once:\n"
 "  §33 states\n"
 "  what is true at *either* door — the walker then makes the test-false door\n"
 "  imply it and makes the §34 site (branch fact §35 in hand) establish\n"
-"  it. Note it may mention the outer §36 by name.\n"
-"\n"
-"One piece of housekeeping first: §37-style arithmetic wants the\n"
-"precondition unbranded, so open with §38.\n"
+"  it. Note it may mention the outer §36 by name. And you don't have to know\n"
+"  any of this in advance: call §37 *bare* and the\n"
+"  walker asks for everything it needs — §38, §39, §40, §41,\n"
+"  **and** an §42 clause goal for the §43-carrying loop. The exit\n"
+"  clause is a first-class request, not folklore.\n"
 "\n"
 "Assemble the call, then sweep — every residual the walker leaves is\n"
-"elementary, and §39 clears the board."
+"elementary, and §44 clears the board. (No housekeeping\n"
+"needed: §45 reads the branded precondition §46 as it stands.)"
 msgstr ""
 
 #. §0: `first_factor(n) ==> 2`
@@ -2731,7 +2929,7 @@ msgstr ""
 #. §3: `return`
 #. §4: `exit2`
 #. §5: `break`
-#: Game/Levels/LoopWorld/L06_NestedBoss.lean:68
+#: Game/Levels/LoopWorld/L06_NestedBoss.lean:70
 msgid "§0 for even §1 — total correctness through a\n"
 "nested loop, a §2, and a mid-loop §3, from five clauses: two\n"
 "invariant/measure pairs and an explicit §4 fact for the §5."
@@ -2742,17 +2940,10 @@ msgstr ""
 #. §2: `2`
 #. §3: `break`
 #. §4: `return`
-#: Game/Levels/LoopWorld/L06_NestedBoss.lean:73
+#: Game/Levels/LoopWorld/L06_NestedBoss.lean:75
 msgid "For every even integer §0, running §1 terminates and\n"
 "returns §2 — through a nested loop, a §3, and a §4 from the\n"
 "middle of the outer loop."
-msgstr ""
-
-#. §0: `have hn2 : (2 : Int) ≤ n := hn`
-#. §1: `Int`
-#: Game/Levels/LoopWorld/L06_NestedBoss.lean:78
-msgid "Housekeeping first: §0 — a copy of the\n"
-"precondition stated over §1, where the arithmetic closers can see it."
 msgstr ""
 
 #. §0: `inv1 := fun (i : Int) => i = 2`
@@ -2761,8 +2952,8 @@ msgstr ""
 #. §3: `dec2 := fun (m : Int) => m.toNat`
 #. §4: `exit2 := fun (m : Int) => 0 ≤ m ∧ m < i ∧ (2:Int) ∣ (n - m)`
 #. §5: `py_vcgen [nested_flow] (…) (…) (…) (…) (…)`
-#: Game/Levels/LoopWorld/L06_NestedBoss.lean:81
-msgid "Now the full call — five clauses: outer §0\n"
+#: Game/Levels/LoopWorld/L06_NestedBoss.lean:80
+msgid "The full call — five clauses: outer §0\n"
 "and §1; inner\n"
 "§2 and\n"
 "§3; and the break's\n"
@@ -2771,15 +2962,25 @@ msgid "Now the full call — five clauses: outer §0\n"
 "All in one §5 call."
 msgstr ""
 
-#. §0: `False`
-#. §1: `return n`
-#. §2: `all_goals grind`
-#: Game/Levels/LoopWorld/L06_NestedBoss.lean:94
-msgid "Nine residuals — outer exit, inner init, the two doors of the inner\n"
-"exit, inner preservation and decrease, outer preservation and decrease\n"
-"(both with *contradictory* hypotheses: the lap is unreachable, §0 is\n"
-"provable), and the final §1 — every one elementary. Sweep:\n"
-"§2."
+#. §0: `exit`
+#. §1: `init`
+#. §2: `exit2`
+#. §3: `exit3`
+#. §4: `preserve`
+#. §5: `dec`
+#. §6: `preserve2`
+#. §7: `dec2`
+#. §8: `False`
+#. §9: `return n`
+#. §10: `ret`
+#. §11: `all_goals grind`
+#: Game/Levels/LoopWorld/L06_NestedBoss.lean:93
+msgid "Nine residuals — the outer §0, the inner §1, the two doors\n"
+"of the inner exit (§2 and §3 — same-tag goals get numbered),\n"
+"inner preservation and decrease (§4, §5), outer preservation\n"
+"and decrease (§6, §7 — both with *contradictory* hypotheses:\n"
+"the lap is unreachable, §8 is provable), and the final §9\n"
+"(§10) — every one elementary. Sweep: §11."
 msgstr ""
 
 #. §0: `break`
