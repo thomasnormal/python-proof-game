@@ -46,15 +46,18 @@ load_program nested_flow from "GameAssets/envelopes/nested_flow.json"
 #py_check tri(4) = 10
 #py_check add(2, 3) = 5
 #py_check midpoint(3, -4) = -1
--- The wave-2 floor rep (MachineWorld L3): floor on double negatives.
-#py_check midpoint(-3, -4) = -4
+-- The wave-3 witness levels (MachineWorld L3/L5): the target the player's
+-- witness must hit, and the common answer both programs produce.
+#py_check tri(5) = 15
+#py_check midpoint(13, 7) = 10
 #py_check my_abs(-5) = 5
 #py_check my_max(3, 5) = 5
 #py_check my_max(5, 3) = 5
+-- `mod` is cited on the arith inventory tile; `floordiv(-3, 0)` is the
+-- one-case run MachineWorld L4's intro says py_check *could* prove.
 #py_check arith.mod(7, 0) raises .zeroDivisionError
--- The wave-2 crash rep (MachineWorld L5): the sibling crashes too.
 #py_check arith.floordiv(-3, 0) raises .zeroDivisionError
--- The floor arc's C-vs-Python pair (cited by StraightLineWorld L3/L4):
+-- The floor arc's C-vs-Python pair (cited by StraightLineWorld L2/L3):
 -- truncation would give -7 // 2 = -3; Python floors to -4.
 #py_check arith.floordiv(7, 2) = 3
 #py_check arith.floordiv(-7, 2) = -4

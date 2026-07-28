@@ -1,7 +1,7 @@
 /- Smoke test for The Python Proof Game levels — NOT part of the game build.
 Run from the game root with `lake env lean GameAssets/smoke_test.lean`.
 Trials every World 1 / World 2 / World 3 statement with its intended proof
-(wave-2 numbering: 6 + 9 + 9 levels). -/
+(wave-3 numbering: 6 + 8 + 9 levels). -/
 import LeanModels.Python.Surface
 import LeanModels.Python.LoopTactic
 import LeanModels.Python.VCTactic
@@ -26,8 +26,8 @@ load_program nested_flow from "GameAssets/envelopes/nested_flow.json"
 -- #py_check non-vacuity, as the levels' Introductions will cite them
 #py_check tri(4) = 10
 #py_check midpoint(3, -4) = -1
-#py_check midpoint(-3, -4) = -4
-#py_check arith.mod(7, 0) raises .zeroDivisionError
+#py_check tri(5) = 15
+#py_check midpoint(13, 7) = 10
 #py_check arith.floordiv(-3, 0) raises .zeroDivisionError
 
 -- W1L1: concrete loop run — `py_check` makes the kernel run the program
@@ -40,28 +40,34 @@ example : tri(4) ==> 10 := by py_check
 -- W1L2: concrete floor-division surprise
 example : midpoint(3, -4) ==> -1 := by py_check
 
--- W1L3 (wave-2 EXERCISE rep): floor on double negatives — predict, then
--- verify: -7 // 2 is -4, not C's -3
-example : midpoint(-3, -4) ==> -4 := by py_check
+-- W1L3 (wave-3 WITNESS level): the player supplies the input. The wrong
+-- witness (the off-by-one ⟨4, ?_⟩ the level's Branch anticipates) must
+-- FAIL — py_check refuses to certify a false run.
+example : ∃ n : PyInt, tri(n) ==> 15 := by
+  fail_if_success (refine ⟨4, ?_⟩; py_check)
+  refine ⟨5, ?_⟩
+  py_check
 
--- W1L4: concrete raise — py_check closes `==>!` goals too
-example : arith.mod(7, 0) ==>! .zeroDivisionError := by py_check
-
--- W1L5 (wave-2 EXERCISE rep): the sibling crashes too, same house error
-example : arith.floordiv(-3, 0) ==>! .zeroDivisionError := by py_check
-
--- W1L6 (bridge): first symbolic statement
-example (a : PyInt) : arith.floordiv(a, 0) ==>! .zeroDivisionError := by
+-- W1L4 (wave-3 THESIS level): first symbolic statement, mid-world — and
+-- the framework sanity the level's prose leans on: `py_check` must REFUSE
+-- the free-variable goal (guard, lean-surfaces 0ff4bb7 fix 1).
+theorem floordiv_zero (n : PyInt) : arith.floordiv(n, 0) ==>! .zeroDivisionError := by
+  fail_if_success py_check
   py_prove [arith]
 
--- W2L1 (wave-2 EXERCISE): add — plus the wave-1 framework sanity:
--- `py_check` must REFUSE the symbolic goal (free-variable guard,
--- lean-surfaces 0ff4bb7 fix 1).
-example (a b : PyInt) : add(a, b) ==> a + b := by
+-- W1L5 (wave-3 WITNESS+∧ level): one common answer, two programs, one
+-- `<;>` sweep; a wrong witness must fail on (at least) one conjunct.
+example : ∃ v : PyInt, tri(4) ==> v ∧ midpoint(13, 7) ==> v := by
+  fail_if_success (refine ⟨11, ?_, ?_⟩ <;> py_check)
+  refine ⟨10, ?_, ?_⟩ <;> py_check
+
+-- W1L6 (capstone EXERCISE): two-variable for-all — the floordiv_zero move
+-- player-driven on a friendlier program; py_check refuses here too.
+theorem add_total (a b : PyInt) : add(a, b) ==> a + b := by
   fail_if_success py_check
   py_prove [add]
 
--- W2L2: midpoint, honest fdiv (step 1 of the floor arc: name the function)
+-- W2L1: midpoint, honest fdiv (step 1 of the floor arc: name the function)
 theorem midpoint_spec (a b : PyInt) : midpoint(a, b) ==> Int.fdiv (a + b) 2 := by
   py_prove [midpoint]
 
@@ -69,7 +75,7 @@ theorem midpoint_spec (a b : PyInt) : midpoint(a, b) ==> Int.fdiv (a + b) 2 := b
 #py_check arith.floordiv(7, 2) = 3
 #py_check arith.floordiv(-7, 2) = -4
 
--- W2L3 "Floor means floor" (step 2): the ⇓ hypothesis + determinism
+-- W2L2 "Floor means floor" (step 2): the ⇓ hypothesis + determinism
 -- (CallsTo.typed_int_eq) pin q, then the division algorithm + grind.
 -- NOTE toolkit findings: omega does NOT know Int.fdiv (opaque atom), cannot
 -- multiply two variables (b * q), and skips PyInt-branded goals — grind
@@ -86,7 +92,7 @@ theorem floordiv_is_floor (a b q : PyInt) (hb : 0 < b)
   have h1 : Int.fmod a b < b := Int.fmod_lt_of_pos a hb
   grind
 
--- W2L4 "Python is not C" (step 3): the concrete run + determinism refute
+-- W2L3 "Python is not C" (step 3): the concrete run + determinism refute
 -- C's truncating answer; the forced equation -3 = -4 is Int-headed, so
 -- omega finishes on its home turf.
 theorem python_is_not_C : ¬ (arith.floordiv(-7, 2) ==> -3) := by
@@ -95,20 +101,20 @@ theorem python_is_not_C : ¬ (arith.floordiv(-7, 2) ==> -3) := by
   have h34 := CallsTo.typed_int_eq h hrun
   omega
 
--- W2L5: the pretty `/` form, unconditional (wave-1 fix)
+-- W2L4: the pretty `/` form, unconditional (wave-1 fix)
 example (a b : PyInt) : midpoint(a, b) ==> (a + b) / 2 := by
   py_corollary [midpoint_spec, Int.fdiv_eq_ediv_of_nonneg]
 
--- W2L6: branching
+-- W2L5: branching
 example (x : PyInt) : my_abs(x) ==> |x| := by py_prove [my_abs]
 
--- W2L7 (wave-2 EXERCISE rep): a second lone-if program, from scratch —
+-- W2L6 (wave-2 EXERCISE rep): a second lone-if program, from scratch —
 -- py_prove splits, and omega knows `max` as natively as `|·|`
 #py_check my_max(3, 5) = 5
 #py_check my_max(5, 3) = 5
 example (a b : PyInt) : my_max(a, b) ==> max a b := by py_prove [my_max]
 
--- W2L8 (boss): two sequential ifs, outside py_prove's recipe. Since
+-- W2L7 (boss): two sequential ifs, outside py_prove's recipe. Since
 -- lean-surfaces 0ff4bb7 (fix 2) that failure is CURATED — the sanity check
 -- runs inline:
 example (x : PyInt) : ag_clamp01.clamp01(x) ==> max 0 (min 1 x) := by
@@ -117,7 +123,7 @@ example (x : PyInt) : ag_clamp01.clamp01(x) ==> max 0 (min 1 x) := by
   by_cases h1 : x < 0 <;> by_cases h2 : 1 < x <;>
     py_simp [callFunction, ag_clamp01, h1, h2] <;> grind
 
--- W2L9 (coda): the same boss shape, generated — one py_vcgen call + sweep
+-- W2L8 (coda): the same boss shape, generated — one py_vcgen call + sweep
 example (x : PyInt) : ag_clamp01.clamp01(x) ==> min 1 (max 0 x) := by
   py_vcgen [ag_clamp01]
   all_goals omega

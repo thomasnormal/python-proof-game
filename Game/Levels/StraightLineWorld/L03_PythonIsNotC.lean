@@ -1,9 +1,9 @@
-import Game.Levels.StraightLineWorld.L03_FloorMeansFloor
+import Game.Levels.StraightLineWorld.L02_FloorMeansFloor
 
 open LeanModels LeanModels.Python
 
 World "StraightLineWorld"
-Level 4
+Level 3
 
 Title "Python is not C"
 

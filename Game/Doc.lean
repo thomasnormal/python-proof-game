@@ -29,32 +29,39 @@ TacticDoc py_check
 /-- `refine e` fills in the goal with the expression `e`, leaving every `?_`
 inside `e` as a new goal.
 
-In this game its job is handing the interpreter its fuel *by hand*:
-`refine ⟨32, ?_⟩` turns the claim “*some* amount of fuel makes this Python
-call finish” into the concrete claim “fuel `32` does” — exactly what
-`py_check` and `py_prove` do for you internally. At the boss you take the
-wheel yourself. Extra fuel is always harmless — a finished run keeps its
+In this game its job is *supplying witnesses*. On an `∃`-goal,
+`refine ⟨5, ?_⟩` commits the value and leaves the claim about it open —
+the find-the-input levels run on exactly this move. And every `==>` goal is
+secretly an existential too (“*some* amount of fuel makes this Python call
+finish”), so the same move later donates the interpreter's fuel by hand:
+`refine ⟨32, ?_⟩` — exactly what `py_check` and `py_prove` do for you
+internally. Extra fuel is always harmless — a finished run keeps its
 result. -/
 TacticDoc refine
 
 /-- `⟨…, …⟩` — the **anonymous constructor**: builds a value of the goal's
-structure-like type without naming its constructor. On an `∃`-goal,
-`⟨w, proof⟩` supplies the witness and the proof of the rest; components
-nest (`⟨a, ⟨rfl, hx⟩, h⟩` fills a chain of `∃`/`∧`), and a component can be
-a tactic block (`by rw [...]`) or a `?_` hole for `refine` to leave open.
+structure-like type without naming its constructor.
 
-Where you meet it: every `==>` statement *is* an existential — “**some**
-fuel finishes the run” — so `refine ⟨32, ?_⟩` donates the fuel witness and
-leaves the run as the goal; and a loop's `exit` goal asks you to package
-final values with the facts about them, e.g.
-`exact ⟨a, ⟨rfl, hx⟩, hcore.1, …⟩`. -/
+Its gentle form is a number witness: on the goal `∃ n, tri(n) ==> 15`,
+`refine ⟨5, ?_⟩` supplies the `n` and leaves `tri(5) ==> 15` open. The
+components flatten through a chain of `∃`/`∧` in one stroke —
+`refine ⟨10, ?_, ?_⟩` opens a two-part claim about one witness — and each
+component can be a term, a `?_` hole for `refine` to leave open, or a
+tactic block (`by rw [...]`).
+
+It calls back later in two costumes: the fuel donation `refine ⟨32, ?_⟩`
+(every `==>` statement *is* an existential — “**some** fuel finishes the
+run”), and a loop's `exit` goal, which asks you to package final values
+with the facts about them, e.g. `exact ⟨a, ⟨rfl, hx⟩, hcore.1, …⟩`. -/
 DefinitionDoc AnonymousConstructor as "⟨…⟩"
 
 /-- `tac₁ <;> tac₂` — the *and-then-on-every-goal* combinator: run `tac₁`,
 then run `tac₂` on **every** goal it produced (a plain newline sequence
 would aim `tac₂` at the first goal only).
 
-The house one-breath idiom:
+First use: after `refine ⟨10, ?_, ?_⟩` leaves one goal per program,
+`<;> py_check` sweeps them all in one stroke. Later, the house one-breath
+idiom chains whole stages:
 `by_cases h1 : x < 0 <;> by_cases h2 : 1 < x <;> py_simp […] <;> grind` —
 split, split again on *both* results (four cases), execute all four
 symbolically, sweep all four with arithmetic. Chains act stage by stage:
@@ -344,7 +351,8 @@ Note the equality case: when `a = b` the test fails and the program returns
 `a` — which is what `max a b` picks there too. -/
 DefinitionDoc my_max as "my_max" in "Python programs"
 
-/-- The loaded module `arith` — a grab bag of one-liners; the game uses:
+/-- The loaded module `arith` — a grab bag of one-liners; the game's star
+is `floordiv`, with its sibling `mod` along for the ride:
 
 ```python
 def floordiv(a, b):
@@ -354,7 +362,7 @@ def mod(a, b):
     return a % b
 ```
 
-Call functions of a module with dotted names: `arith.mod(7, 0)`. -/
+Call functions of a module with dotted names: `arith.floordiv(-3, 0)`. -/
 DefinitionDoc arith as "arith" in "Python programs"
 
 /-- The loaded program `ag_clamp01` — the boss of Straight-Line World:

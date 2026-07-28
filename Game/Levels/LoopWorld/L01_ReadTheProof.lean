@@ -59,6 +59,6 @@ come off — mid-proof.
 "
 
 NewTactic case obtain rfl
-NewHiddenTactic Hole
+NewHiddenTactic Hole Template
 NewTheorem rfl
 NewDefinition Int

@@ -11,7 +11,8 @@ You'll prove theorems like
 
 ```lean
 theorem tri_four : tri(4) ==> 10                     -- run a loop inside a proof
-theorem mod_seven_zero : arith.mod(7, 0) ==>! .zeroDivisionError  -- prove a crash
+example : ∃ n : PyInt, tri(n) ==> 15                 -- hunt the witness yourself
+theorem floordiv_zero (n : PyInt) : arith.floordiv(n, 0) ==>! .zeroDivisionError
 theorem add_total (a b : PyInt) : add(a, b) ==> a + b   -- ... for EVERY input
 theorem midpoint_spec (a b : PyInt) : midpoint(a, b) ==> Int.fdiv (a + b) 2
 ```
@@ -20,9 +21,11 @@ in the playful style of the Natural Number Game.
 
 ## Contents
 
-- **World 1 — Machine World** (6 levels): concrete runs; the kernel executes
-  Python inside your proofs. Ends at the symbolic bridge.
-- **World 2 — Straight-Line World** (9 levels): symbolic inputs, `py_prove`,
+- **World 1 — Machine World** (6 levels): the kernel executes Python inside
+  your proofs — watch a run, predict a run, then *supply* what the goal
+  withholds: a witness input, a crash theorem over every integer at once, a
+  common answer two programs share.
+- **World 2 — Straight-Line World** (8 levels): programs that choose;
   the floor arc (prove `//` floors, then prove Python and C disagree),
   preconditions as hypotheses, and a boss fight at the documented boundary
   of the automation — then the boss fight, mechanized (`py_vcgen`).

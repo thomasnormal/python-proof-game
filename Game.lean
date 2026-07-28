@@ -15,12 +15,13 @@ parser, shipped into Lean as a syntax tree, and executed by a *verified
 interpreter* that is differentially tested against CPython. The theorems are
 about the programs as written — floor division, `ZeroDivisionError` and all.
 
-You'll start by running programs *inside proofs* (Machine World), graduate to
-symbolic inputs — one theorem covering every integer at once (Straight-Line
-World) — and then face `while` loops (Loop World), where you'll invent the
-two things no machine can: **loop invariants** and **decreasing measures**,
-and feed them to `py_vcgen`, the framework's verification-condition walker —
-all the way to a nested-loop, `break`-and-`return` boss fight.
+You'll start by running programs *inside proofs* and cross into symbolic
+territory before the first world is out — one theorem covering every integer
+at once (Machine World). Then come programs that *choose* (Straight-Line
+World), and `while` loops (Loop World), where you'll invent the two things
+no machine can: **loop invariants** and **decreasing measures**, and feed
+them to `py_vcgen`, the framework's verification-condition walker — all the
+way to a nested-loop, `break`-and-`return` boss fight.
 
 Built on the [lean-surfaces](https://github.com/thomasnormal/lean-surfaces)
 framework. No prior Lean experience needed; if you've played the Natural

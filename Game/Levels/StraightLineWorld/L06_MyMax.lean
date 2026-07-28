@@ -1,9 +1,9 @@
-import Game.Levels.StraightLineWorld.L06_MyAbs
+import Game.Levels.StraightLineWorld.L05_MyAbs
 
 open LeanModels LeanModels.Python
 
 World "StraightLineWorld"
-Level 7
+Level 6
 
 Title "Fork, again"
 

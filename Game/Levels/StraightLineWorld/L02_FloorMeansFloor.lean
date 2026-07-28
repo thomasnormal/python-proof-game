@@ -1,9 +1,9 @@
-import Game.Levels.StraightLineWorld.L02_MidpointSpec
+import Game.Levels.StraightLineWorld.L01_MidpointSpec
 
 open LeanModels LeanModels.Python
 
 World "StraightLineWorld"
-Level 3
+Level 2
 
 Title "Floor means floor"
 

@@ -1,9 +1,9 @@
-import Game.Levels.StraightLineWorld.L07_MyMax
+import Game.Levels.StraightLineWorld.L06_MyMax
 
 open LeanModels LeanModels.Python
 
 World "StraightLineWorld"
-Level 8
+Level 7
 
 Title "Boss: clamp01"
 
@@ -24,20 +24,19 @@ def clamp01(x):
 `py_prove [ag_clamp01]` if you like: it fails *on purpose*, with a short
 note pointing at the heavier tools. Now you get to be the automation.
 
-The house pattern for multi-`if` bodies, with four new tools (each has an
-inventory tile):
+The house pattern for multi-`if` bodies — two new tools, two old moves:
 
 1. **Fuel first.** Every `==>` goal hides an existential — “*some* step
-   budget finishes this run” — and nothing can execute until a budget is on
-   the table. `refine ⟨32, ?_⟩` (the `⟨…⟩` is the **anonymous
-   constructor**) donates the witness and leaves the run open.
-2. **Decide the branches up front** with `by_cases` — four cases, each with
-   its tests answered.
-3. **Execute** each with `py_simp`, handing it your case facts.
+   budget finishes this run” — and nothing executes until a budget is on
+   the table. The same witness move from Machine World, `refine ⟨32, ?_⟩` —
+   this time the witness is *fuel*.
+2. **Decide the branches up front** with the new `by_cases` — four cases,
+   each with its tests answered.
+3. **Execute** each with the new `py_simp`, handing it your case facts.
 4. **Finish** with `grind` — *not* `omega`: the case facts wear the `PyInt`
    brand.
 
-Chain the stages with **`<;>`** (“then, on every goal just produced…”) —
+Chain the stages with `<;>` — your two-program sweep, four goals wide —
 one breath, or step by step. The hints stage it either way.
 "
 
@@ -50,7 +49,7 @@ clamped to `[0, 1]` — that is, `max 0 (min 1 x)`. -/
 Statement clamp01_total (x : PyInt) : ag_clamp01.clamp01(x) ==> max 0 (min 1 x) := by
   Hint "Step 1 — commit fuel, and commit it *first*: the goal is secretly an
   existential (“some fuel finishes this run”), so nothing can execute the
-  body until a concrete budget is on the table. The anonymous constructor
+  body until a concrete budget is on the table. Machine World's witness move
   hands it over: `refine ⟨32, ?_⟩` — witness `32`, run left open as `?_`."
   Branch
     by_cases h1 : x < 0
@@ -79,5 +78,5 @@ facts, symbolic runs, the sweep — was a *procedure*. And procedures can be
 mechanized. Next level, the machine rises.
 "
 
-NewTactic refine py_simp by_cases «<;>»
-NewDefinition ag_clamp01 LeanModels.Python.callFunction AnonymousConstructor
+NewTactic py_simp by_cases
+NewDefinition ag_clamp01 LeanModels.Python.callFunction

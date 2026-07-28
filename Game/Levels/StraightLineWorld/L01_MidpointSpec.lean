@@ -1,9 +1,9 @@
-import Game.Levels.StraightLineWorld.L01_AddTotal
+import Game.Levels.MachineWorld
 
 open LeanModels LeanModels.Python
 
 World "StraightLineWorld"
-Level 2
+Level 1
 
 Title "Say floor when you mean floor"
 
@@ -16,7 +16,7 @@ def midpoint(a: int, b: int) -> int:
 ```
 
 What does `midpoint` return *in general*? “`(a + b) / 2`, obviously” — but
-Machine World caught you twice: `//` **floors**.
+Machine World caught you once already: `//` **floors**.
 
 Lean has a zoo of integer divisions (`Int.div` truncates, `/` is Euclidean,
 `Int.fdiv` floors — details on the new `Int.fdiv` inventory tile). Only one

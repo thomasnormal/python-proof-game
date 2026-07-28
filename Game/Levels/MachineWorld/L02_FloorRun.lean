@@ -40,6 +40,9 @@ Statement midpoint_three_negfour : midpoint(3, -4) ==> -1 := by
 Conclusion "
 The machine agreed: `-1`. Remember this level — in Straight-Line World the
 floor-vs-truncation distinction stops being a party trick and becomes part of
-an honest theorem *statement*. First, one more round against your C
-instincts.
+an honest theorem *statement*.
+
+Two levels in, a pattern: level one you *watched* the machine; this level
+you *predicted* it. Next level the goal loses a piece — and you **supply**
+it.
 "

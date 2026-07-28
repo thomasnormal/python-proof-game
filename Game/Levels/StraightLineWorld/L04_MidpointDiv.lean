@@ -1,9 +1,9 @@
-import Game.Levels.StraightLineWorld.L04_PythonIsNotC
+import Game.Levels.StraightLineWorld.L03_PythonIsNotC
 
 open LeanModels LeanModels.Python
 
 World "StraightLineWorld"
-Level 5
+Level 4
 
 Title "The strongest honest statement"
 
