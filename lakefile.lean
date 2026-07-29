@@ -77,7 +77,7 @@ For local iteration you may instead use a path dependency:
   require «lean-models» from "/home/thomas-ahle/lean_models"
 but the git form below is the publication-ready one. -/
 require «lean-models» from git
-  "https://github.com/thomasnormal/lean-surfaces" @ "0ff4bb705b560387c5b9635b8bcdde5289544671"
+  "https://github.com/thomasnormal/lean-surfaces" @ "12b222a2c2cb86448e00523a1781fc84ade20263"
 
 /-!
 # PACKAGE CONFIGURATION

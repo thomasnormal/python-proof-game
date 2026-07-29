@@ -45,14 +45,15 @@ Statement : ∃ n : PyInt, tri(n) ==> 15 := by
   Branch
     refine ⟨4, ?_⟩
     Hint "`tri(4)` was level 1's theorem — it returns `10`, not `15`, and
-    `py_check` refuses to certify a false run. Undo, take one more loop
-    turn, and raise your witness."
+    `py_check` won't certify a false run — it names what it actually
+    computed: *the run produced `10` but the goal claims `15`*. Undo, take
+    one more loop turn, and raise your witness."
   refine ⟨5, ?_⟩
   Hint "The `∃` is gone — your witness sits in the goal, which is concrete
   again. Finish with the machine move."
   Hint (hidden := true) "`py_check` — the kernel runs `tri(5)` and lands on
-  `0+1+2+3+4+5 = 15`. (If it refuses, your witness was wrong: undo and
-  recount.)"
+  `0+1+2+3+4+5 = 15`. (If it disagrees, it'll tell you exactly what it
+  computed instead: undo and recount.)"
   py_check
 
 Conclusion "

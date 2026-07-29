@@ -32,14 +32,15 @@ time the books need no `2 *` trick — the sum *is* a product.) What keeps
 /-- For every integer `n ≥ 0`, running `double_sum` terminates and returns
 `n * (n - 1)`: the first `n` even numbers sum to a product. -/
 Statement (n : PyInt) (hn : 0 ≤ n) : double_sum(n) ==> n * (n - 1) := by
-  Hint "Open bare — `py_vcgen [double_sum]` — then answer `inv1` and `dec1`
-  with `exact fun total k => …`. Books, range floor, range ceiling; then
-  the distance remaining."
+  Hint "Open bare — `py_vcgen [double_sum]` — then answer `inv1` and `dec1`:
+  each hands you `total k : Int` by name in the goal context, so answer
+  with a bare proposition/measure, not a lambda. Books, range floor, range
+  ceiling; then the distance remaining."
   py_vcgen [double_sum]
-  Hint (hidden := true) "`case inv1 => exact fun total k => 0 ≤ k ∧ k ≤ n ∧ total = k * (k - 1)`"
-  case inv1 => exact fun total k => 0 ≤ k ∧ k ≤ n ∧ total = k * (k - 1)
-  Hint (hidden := true) "`case dec1 => exact fun total k => (n - k).toNat`"
-  case dec1 => exact fun total k => (n - k).toNat
+  Hint (hidden := true) "`case inv1 => exact 0 ≤ k ∧ k ≤ n ∧ total = k * (k - 1)`"
+  case inv1 => exact 0 ≤ k ∧ k ≤ n ∧ total = k * (k - 1)
+  Hint (hidden := true) "`case dec1 => exact (n - k).toNat`"
+  case dec1 => exact (n - k).toNat
   Hint (hidden := true) "No division anywhere in the books, so no `ret`
   surgery is needed: the ceiling and the negated test pin `k' = n`, and
   `all_goals grind` sweeps everything."

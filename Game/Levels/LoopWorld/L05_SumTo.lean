@@ -21,9 +21,10 @@ def sum_to(n: int) -> int:
 
 This loop counts **down**, mutating its own argument — a naming problem for
 the invariant. Clause binders are the Python names assigned in the loop
-body: `s`, `n`. Written inline, `(inv := fun (s n : Int) => …)` matches by
-*name*, not position. Delayed-goal style (`case inv1 => exact fun … => …`)
-binds positionally instead — copy the order shown in the goal.
+body: `s`, `n`. Both routes match by *name* now, so there's no order to
+track either way: written inline, `(inv := fun (s n : Int) => …)`; left
+delayed, `case inv1` hands you `s` and `n` straight into the goal context
+and you answer with a bare proposition over them.
 
 So inside your clauses `n` means the **current, shrinking** value — but the
 theorem needs `n`'s starting value too, and that name is taken. The escape:

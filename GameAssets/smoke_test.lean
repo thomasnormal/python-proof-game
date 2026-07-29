@@ -140,23 +140,27 @@ theorem tri_total (n : PyInt) (hn : 0 ≤ n) : tri(n) ==> n * (n + 1) / 2 := by
     grind
   all_goals grind
 
--- W3L2: tri, DELAYED mode — the player invents the invariant mid-proof
+-- W3L2: tri, DELAYED mode — the player invents the invariant mid-proof.
+-- Since lean-surfaces 12b222a (fix 1): the inv1/dec1 goals present the
+-- loop's variables as a NAMED BINDER TELESCOPE in the goal context
+-- (`total i : Int ⊢ Prop`), closed with a BARE PROPOSITION — no lambda.
 example (n : PyInt) (hn : 0 ≤ n) : tri(n) ==> n * (n + 1) / 2 := by
   py_vcgen [tri]
-  case inv1 => exact fun total i => 0 ≤ i ∧ i ≤ n + 1 ∧ 2 * total = i * (i - 1)
-  case dec1 => exact fun total i => (n + 1 - i).toNat
+  case inv1 => exact 0 ≤ i ∧ i ≤ n + 1 ∧ 2 * total = i * (i - 1)
+  case dec1 => exact (n + 1 - i).toNat
   case ret =>
     obtain rfl : i' = n + 1 := by omega
     grind
   all_goals grind
 
 -- W3L3 (wave-2 EXERCISE rep): the invent-the-invariant skill on a fresh,
--- near-isomorphic loop, delayed mode; product-form books, no ret surgery
+-- near-isomorphic loop, delayed mode (bare-proposition style, 12b222a fix
+-- 1); product-form books, no ret surgery
 #py_check double_sum(4) = 12
 example (n : PyInt) (hn : 0 ≤ n) : double_sum(n) ==> n * (n - 1) := by
   py_vcgen [double_sum]
-  case inv1 => exact fun total k => 0 ≤ k ∧ k ≤ n ∧ total = k * (k - 1)
-  case dec1 => exact fun total k => (n - k).toNat
+  case inv1 => exact 0 ≤ k ∧ k ≤ n ∧ total = k * (k - 1)
+  case dec1 => exact (n - k).toNat
   all_goals grind
 
 -- W3L4 (wave-2 EXERCISE): odd_sum — invariant from scratch, clause form
@@ -231,15 +235,20 @@ theorem first_factor_even (n : PyInt) (hn : 2 ≤ n) (h2 : (2:Int) ∣ n) :
 
 -- W3L9 delayed-mode sanity (0ff4bb7 fix 5): bare py_vcgen REQUESTS the
 -- break-carrying loop's exit clause as goal `exit2` — the route the
--- level's intro advertises.
+-- level's intro advertises. Since 12b222a (fix 1): every delayed goal
+-- (inv1/dec1/inv2/dec2/exit2) hands over its loop's variables by name in
+-- the goal context and is closed bare, no lambda; `exit2`'s telescope is
+-- just `m` (the inner loop's own assigned variable) — the outer `i` is
+-- already an ordinary context variable by the time this goal appears, so
+-- it's mentioned directly, exactly as the inline `(exit2 := …)` form notes.
 example (n : PyInt) (hn : 2 ≤ n) (h2 : (2:Int) ∣ n) :
     nested_flow.first_factor(n) ==> 2 := by
   py_vcgen [nested_flow]
-  case inv1 => exact fun i => i = 2
-  case dec1 => exact fun i => (n - i).toNat
-  case inv2 => exact fun m => 0 ≤ m ∧ (2:Int) ∣ (n - m)
-  case dec2 => exact fun m => m.toNat
-  case exit2 => exact fun m => 0 ≤ m ∧ m < i ∧ (2:Int) ∣ (n - m)
+  case inv1 => exact i = 2
+  case dec1 => exact (n - i).toNat
+  case inv2 => exact 0 ≤ m ∧ (2:Int) ∣ (n - m)
+  case dec2 => exact m.toNat
+  case exit2 => exact 0 ≤ m ∧ m < i ∧ (2:Int) ∣ (n - m)
   all_goals grind
 
 -- Non-vacuity for the remaining programs, as the level texts cite them

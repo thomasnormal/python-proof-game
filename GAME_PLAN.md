@@ -19,7 +19,12 @@ against CPython, typed spec surface: `f(a) ==> v`, `py_prove`, `py_loop`, …).
   added six levels, capped every intro at ≤200 words, and made 53% of hints
   hidden; **wave 3** (witness redesign, below) traded two Machine World
   `py_check` reps for puzzle levels and absorbed `add_total` — exercise
-  share now 8/23 ≈ 35% (honest recount below).
+  share now 8/23 ≈ 35% (honest recount below). **Round 3** (2026-07, below)
+  bumped the lean-surfaces pin to `12b222a` and migrated every delayed-mode
+  `py_vcgen` proof off the old positional-lambda style onto the framework's
+  new named-binder telescope (friction log #26); `py_check`'s wrong-guess
+  diagnostic and `py_vcgen`'s `∃`-relational entry landed as pure UX/
+  capability wins requiring no proof changes (#27, #28).
 - **Designed, not built**: World 4 (RSA World, below) — next up.
 
 ## Toolchain findings (the critical reconciliation)
@@ -27,7 +32,7 @@ against CPython, typed spec surface: `f(a) ==> v`, `py_prove`, `py_loop`, …).
 | Component | Version | Note |
 |---|---|---|
 | Game toolchain | `leanprover/lean4:v4.33.0-rc1` | matches lean-surfaces exactly |
-| lean-surfaces (`lean-models`) | git `8cb98e2e28c8e6a5340a79562d1d9448a49250d1` | == public `master`; the rev that adds `py_vcgen` (VCTactic.lean, the flow-aware VC walker). Previously `60ae7c8d` (first rev with `py_check`) |
+| lean-surfaces (`lean-models`) | git `12b222a2c2cb86448e00523a1781fc84ade20263` | round-3 playtest fixes (below): named-binder telescopes for delayed `py_vcgen` clauses, the `∃`-relational entry's marshalled-binder shape, `py_check`'s value-reporting failures, `py_prove`'s documented hypothesis-passing. Previously `0ff4bb7` (round-1 fixes), `8cb98e2e` (the rev that adds `py_vcgen`), `60ae7c8d` (first rev with `py_check`) |
 | lean4game GameServer | git tag `v4.31.0` (newest release) | **compiles cleanly under v4.33.0-rc1** |
 | batteries | tag `v4.33.0-rc1` (root-level pin) | shadows GameServer's transitive `v4.31.0` require, which would not build on this toolchain |
 | i18n (hhu-adam) | `v4.31.0` (via GameServer) | compiles cleanly under v4.33.0-rc1 |
@@ -116,19 +121,22 @@ recipe knows `max` as natively as `|·|`.)
 
 ### World 3 — Loop World (built; 9 levels)
 
-`while` loops on `py_vcgen` (VCTactic.lean, lean-surfaces `8cb98e2e`):
+`while` loops on `py_vcgen` (VCTactic.lean, lean-surfaces `8cb98e2e`,
+delayed-clause shape current as of `12b222a`):
 clause mode `(inv := …) (dec := …)`, and — the world's central mechanic —
-**delayed-goal mode**: `py_vcgen [prog]` bare leaves `case inv1 ⊢ Int → … →
-Prop` and `case dec1 ⊢ Int → … → Nat` goals; assigning them (with `exact
-fun … => …`) instantiates every downstream residual, so wrong invariants
-produce *residual goals as feedback*. Residual tags: `init`, `preserve`,
-`dec`, `exit` (an ∃-shaped repack of invariant + negated test at the exit
-point — `grind` food), `ret`.
+**delayed-goal mode**: `py_vcgen [prog]` bare leaves `case inv1` and `case
+dec1` goals that hand over the loop's variables as a *named binder
+telescope in the goal context* (`total i : Int ⊢ Prop` resp. `⊢ Nat`);
+assigning them (with a **bare proposition/measure over those names** —
+`exact 0 ≤ i ∧ …`, no lambda) instantiates every downstream residual, so
+wrong invariants produce *residual goals as feedback*. Residual tags:
+`init`, `preserve`, `dec`, `exit` (an ∃-shaped repack of invariant +
+negated test at the exit point — `grind` food), `ret`.
 
 | # | Level | Statement | Proof | Introduces |
 |---|---|---|---|---|
 | 1 | Anatomy of a loop proof | `tri_total (hn : 0 ≤ n) : tri(n) ==> n * (n + 1) / 2` | full clause-mode proof as a visible `Template`; player fills two `grind` Holes (`case ret` finish + `all_goals`) | invariant/measure as clauses, the residual tags, `case`, `obtain`/`rfl`, `Int`; since wave 3 also the hidden `Template` (the first templated level — Machine World's bridge Template is gone). Wave 2: intro dieted 521→200 words — the tag glossary lives on the `py_vcgen` doc tile |
-| 2 | **Invent the invariant** (the heart) | same claim, anonymous | `py_vcgen [tri]` bare → player answers `inv1`/`dec1` with `exact fun total i => …`, then closes the residuals | delayed-goal mode; `exact`; the two honest failure modes (below, kept undiluted through the wave-2 prose diet); programs `double_sum` + `odd_sum` (foreshadow) |
+| 2 | **Invent the invariant** (the heart) | same claim, anonymous | `py_vcgen [tri]` bare → player answers `inv1`/`dec1` with a bare proposition/measure over the named context binders `total i : Int` (`exact 0 ≤ i ∧ …`), then closes the residuals | delayed-goal mode; `exact`; the two honest failure modes (below, kept undiluted through the wave-2 prose diet); programs `double_sum` + `odd_sum` (foreshadow) |
 | 3 | Invent it again, doubled *(wave 2)* | `double_sum(n) ==> n * (n - 1)` for `n ≥ 0` (anonymous) | delayed mode: `py_vcgen [double_sum]` bare, `inv1 := 0 ≤ k ∧ k ≤ n ∧ total = k * (k - 1)`, `dec1 := (n - k).toNat`, `all_goals grind` | **nothing** (exercise: the game's central skill, second rep on a near-isomorphic fresh loop; product-form books, no `ret` surgery) |
 | 4 | The sum of odd numbers | `odd_sum_total (hn : 0 ≤ n) : odd_sum(n) ==> n * n` | clauses from scratch (`total = k * k` + range; `(n - k).toNat`), `all_goals grind` sweeps everything incl. `ret` | **nothing** (exercise since wave 2: `odd_sum` doc moved to L2) |
 | 5 | The shadowed variable | `sum_to_total (N) (hN : 0 ≤ N) : sum_to(N) ==> N * (N + 1) / 2` | clauses with binders `(s n : Int)`; `case ret => obtain rfl : n' = 0` | the shadowing rule: the loop mutates Python's `n`, so the *theorem* binds the initial value as capital `N`; program `steps` (foreshadow) |
@@ -475,6 +483,55 @@ Things worth knowing when extending the game:
     it there is **post-unlock backtracking** — finish past SLW L2, then
     replay an earlier Machine World level — which is off the mainline path.
     No fix applied; noted so a future pass doesn't rediscover it as new.
+26. **Delayed-mode clauses are now named-binder telescopes, not positional
+    lambdas** (lean-surfaces `12b222a`, round-3 fix 1 — fixes the learner
+    playtest's cross-wired `steps` invariant). Bare `py_vcgen [prog]` used to
+    leave `case inv1 ⊢ Int → … → Prop` goals closed with `exact fun total i
+    => …`, consuming the lambda *positionally* — swap the binder order and
+    the tactic accepted it anyway, silently cross-wiring the invariant (the
+    L5 shadowing prose's old warning: "copy the order shown in the goal").
+    Now the goal *introduces* the loop's variables as ordinary named context
+    binders (`total i : Int ⊢ Prop`), so the clause is a **bare proposition
+    over those names** (`case inv1 => exact 0 ≤ i ∧ …`) — no lambda, no
+    order to get wrong, and a stray `exact fun … => …` fails loudly with a
+    type mismatch (this repo's grep for `case inv…\s*=>\s*exact fun` /
+    `case dec…\s*=>\s*exact fun` / `case exit…\s*=>\s*exact fun` should stay
+    empty from here on — LoopWorld L2/L3 and the smoke test's W3L2/W3L3/W3L9
+    delayed-mode entries migrated). Inline clause form (`(inv := fun (x y :
+    Int) => …)`) is unchanged — it already matched by name — so this is a
+    pure improvement to the delayed route, and it makes L5's "positional vs.
+    by-name" contrast between the two entry modes obsolete: both are by-name
+    now (L5's prose updated accordingly).
+27. **`py_check`'s wrong-guess failure now states the computed value**
+    (lean-surfaces `12b222a`, round-3 fix 3): a concrete goal whose run
+    decides differently from the claim (wrong value, wrong exception, fuel
+    timeout) fails with (probed directly on the MW L3 witness shape)
+    `py_check: the run (fuel 4096) produced / Res.ok (Val.int 10) / but the
+    goal claims / Res.ok (Val.int 15)` instead of the old one-size-fits-all
+    "not a concrete run" guard message (which is now reserved for genuinely
+    symbolic goals). This **satisfies the fun-critic's playtest suggestion**
+    that a wrong witness should diagnose itself rather than merely refuse —
+    the witness levels (MW L3 "Find the input", MW L5 "Two programs, one
+    answer") get the better UX for free, no proof changes needed. Their
+    hints were already honest ("py_check refuses to certify a false run")
+    and didn't quote the old generic wording verbatim, so no correction was
+    *required* — but MW L3's `Branch` hint (the anticipated `⟨4, ?_⟩`
+    off-by-one) now previews the actual diagnostic instead of just "refuses
+    to certify"; MW L5 has no wrong-witness hint to update (its smoke-test
+    `⟨11, …⟩` regression is prose-free).
+28. **`py_vcgen` accepts its advertised `∃`-relational shape**
+    (lean-surfaces `12b222a`, round-3 fix 2): `∃ v : PyInt, f(args) ==> v ∧
+    Φ v` used to be rejected outright (the surface notation elaborates the
+    result slot as `ToVal.toVal v`, not a bare bound variable, which the old
+    entry matcher demanded) — the error just echoed the goal back. Now both
+    shapes bridge (raw `Val` binder via `PyTriple.exists_callsTo`, marshalled
+    `PyInt`/spec-typed binder via the new `PyTriple.exists_callsTo_toVal`),
+    including through a loop in delayed mode. **Future level material, not
+    built this pass**: a natural World 3/4 bridge level is `∃ v,
+    first_factor(n) ==> v ∧ v ∣ n` (the shape a playtest learner's transfer
+    test reached for on their own) — an unconditional statement of
+    `first_factor`'s divisibility guarantee, provable without the mathlib
+    `minFac` machinery the boss's `== 2` claim was scoped to avoid.
 
 ## One-tactic levels audit
 

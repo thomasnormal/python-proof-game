@@ -23,7 +23,20 @@ run down to `.ok v` (resp. `.exn e`). No test framework, no mocking: the
 Python program executes inside the proof checker.
 
 It refuses symbolic goals on principle — a free variable means there is
-nothing concrete to run. That is `py_prove`'s territory. -/
+nothing concrete to run. That is `py_prove`'s territory. On a *concrete*
+goal whose run decides differently from what you claimed — wrong value,
+wrong exception, or a fuel timeout — the failure states what the run
+actually produced, e.g.
+
+```
+py_check: the run (fuel 4096) produced
+  Res.ok (Val.int 10)
+but the goal claims
+  Res.ok (Val.int 15)
+```
+
+A wrong witness doesn't just stall the proof; it tells you what it computed
+instead. -/
 TacticDoc py_check
 
 /-- `refine e` fills in the goal with the expression `e`, leaving every `?_`
@@ -77,6 +90,13 @@ It commits a fuel witness, symbolically executes the interpreter with
 discharges the residual value equations with `rfl`/`omega`. If a symbolic
 `if` survives as an `ite`, it `split`s the branches and finishes each side
 with `omega`.
+
+The bracket list is a `py_simp` lemma list, so besides program constants it
+also accepts local **hypotheses** the symbolic run needs as rewrite facts —
+the standard use is a divisor guard: `py_prove [arith, hb']` with
+`hb' : b ≠ 0` lets the hypothesis decide `%`/`//`'s `ZeroDivisionError`
+branch, which bare `py_prove [arith]` leaves stuck (Straight-Line World's
+floor arc leans on exactly this move).
 
 Its limit is honest: *two sequential* `if`s produce a shape its single-`split`
 recipe cannot attack — that is the boss level of Straight-Line World. And it
@@ -192,13 +212,17 @@ py_vcgen [prog]
 
 The i-th `inv`/`dec` pair belongs to the i-th `while` (source order; label
 them `inv1`, `dec1`, … when there are several). Binder names must be the
-Python names of the variables **assigned in that loop's body**; everything
-else stays pinned and can be mentioned directly. *Omit* the clauses and the
-walker leaves them as delayed goals `inv1`/`dec1` — the proof pauses until you
-invent the invariant — and a `break`-carrying loop gets its exit clause
-requested the same way (`exit2`). An `(exit := …)` clause states a loop's
-exit fact explicitly — a loop with a `break` has *two* doors out, and the
-bare invariant plus negated test only describes one. -/
+Python names of the variables **assigned in that loop's body**, matched *by
+name* (any order) — everything else stays pinned and can be mentioned
+directly. *Omit* the clauses and the walker leaves them as delayed goals —
+`case inv1`, `case dec1`, … — presenting the loop's variables as a **named
+binder telescope in the goal context** (`total i : Int ⊢ Prop` resp. `⊢
+Nat`): answer with a **bare proposition or measure over those names**
+(`case inv1 => exact 0 ≤ i ∧ …`), not a lambda — the proof pauses until you
+invent the invariant. A `break`-carrying loop gets its exit clause requested
+the same way (`exit2`, same telescope). An `(exit := …)` clause states a
+loop's exit fact explicitly — a loop with a `break` has *two* doors out, and
+the bare invariant plus negated test only describes one. -/
 TacticDoc py_vcgen
 
 /-- `all_goals tac` runs `tac` on every remaining goal and insists it closes
@@ -224,9 +248,11 @@ TacticDoc case
 /-- `exact e` closes the goal with the term `e`, exactly.
 
 In this world you mostly use it to *hand over data*: a delayed clause goal
-like `inv1 : Int → Int → Prop` is closed by
-`exact fun total i => 0 ≤ i ∧ …` — not a proof, a *definition* of the
-invariant. Assigning it instantiates every residual goal that mentions it. -/
+like `case inv1` hands you the loop's variables by name in the context
+(`total i : Int ⊢ Prop`), and you close it with a **bare proposition** over
+those names — `exact 0 ≤ i ∧ …` — not a lambda, not a proof: a *definition*
+of the invariant. Assigning it instantiates every residual goal that
+mentions it. -/
 TacticDoc exact
 
 /-- `obtain pat : P := by tac` proves `P` on the side and destructs it into
