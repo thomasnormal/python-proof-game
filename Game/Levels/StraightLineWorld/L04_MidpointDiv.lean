@@ -40,7 +40,9 @@ the pretty `/` form, earned from `midpoint_spec` plus arithmetic, without
 re-running the program. -/
 Statement midpoint_div (a b : PyInt) : midpoint(a, b) ==> (a + b) / 2 := by
   Hint "Don't re-execute anything. Bridge the value of `midpoint_spec` to the
-  `/` form: `py_corollary [midpoint_spec, Int.fdiv_eq_ediv_of_nonneg]`."
+  `/` form with `py_corollary`, rewriting by `Int.fdiv_eq_ediv_of_nonneg`."
+  Hint (hidden := true)
+    "`py_corollary [midpoint_spec, Int.fdiv_eq_ediv_of_nonneg]`."
   py_corollary [midpoint_spec, Int.fdiv_eq_ediv_of_nonneg]
 
 Conclusion "

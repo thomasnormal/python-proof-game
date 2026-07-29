@@ -32,7 +32,7 @@ The house pattern for multi-`if` bodies — two new tools, two old moves:
    this time the witness is *fuel*.
 2. **Decide the branches up front** with the new `by_cases` — four cases,
    each with its tests answered.
-3. **Execute** each with the new `py_simp`, handing it your case facts.
+3. **Execute** each with the new `py_simp`, handing it `callFunction` and your case facts.
 4. **Finish** with `grind` — *not* `omega`: the case facts wear the `PyInt`
    brand.
 

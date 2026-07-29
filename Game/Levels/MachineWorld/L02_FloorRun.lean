@@ -15,12 +15,12 @@ def midpoint(a: int, b: int) -> int:
     return (a + b) // 2
 ```
 
-Quick, what is `midpoint(3, -4)` in Python?
+Quick — before you look at the goal below, work out `midpoint(3, -4)` in
+your head: `3 + (-4)` is `-1`; now `-1 // 2` in *Python*. Lock in your
+answer.
 
-`3 + (-4)` is `-1`, and `-1 // 2` is… `-1`. **Not** `0`. Python's `//` is
-*floor* division — it rounds toward minus infinity, not toward zero. If you
-guessed `0`, you were thinking like C. The interpreter under this game thinks
-like CPython, because it is tested *against* CPython.
+Python's `//` is *floor* division, not truncation toward zero — think about
+which way `-1 // 2` rounds before the machine tells you.
 
 Prove the run. Same move as before: make the machine run it.
 "
@@ -38,9 +38,14 @@ Statement midpoint_three_negfour : midpoint(3, -4) ==> -1 := by
   py_check
 
 Conclusion "
-The machine agreed: `-1`. Remember this level — in Straight-Line World the
-floor-vs-truncation distinction stops being a party trick and becomes part of
-an honest theorem *statement*.
+The machine's verdict: `-1`. **Not** `0` — Python's `//` rounds toward minus
+infinity, not toward zero. If you guessed `0`, you were thinking like C; the
+interpreter under this game thinks like CPython, because it is tested
+*against* CPython.
+
+Remember this level — in Straight-Line World the floor-vs-truncation
+distinction stops being a party trick and becomes part of an honest theorem
+*statement*.
 
 Two levels in, a pattern: level one you *watched* the machine; this level
 you *predicted* it. Next level the goal loses a piece — and you **supply**

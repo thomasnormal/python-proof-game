@@ -19,24 +19,19 @@ def sum_to(n: int) -> int:
     return s
 ```
 
-This loop counts **down** by mutating its own argument — a naming problem
-your invariant has to survive.
+This loop counts **down**, mutating its own argument — a naming problem for
+the invariant. Clause binders are the Python names assigned in the loop
+body: `s`, `n`. Written inline, `(inv := fun (s n : Int) => …)` matches by
+*name*, not position. Delayed-goal style (`case inv1 => exact fun … => …`)
+binds positionally instead — copy the order shown in the goal.
 
-Clause binders must be the Python names of the variables *assigned in the
-loop body* — here `s` and `n`, **matched by name, in any order** (write
-`fun (s n : Int)` or `fun (n s : Int)`; what matters is the names, not the
-positions). So inside your clauses, `n` necessarily
-means the **current, shrinking** value. But the theorem is about the value
-`n` *started* as — and that name is already taken!
+So inside your clauses `n` means the **current, shrinking** value — but the
+theorem needs `n`'s starting value too, and that name is taken. The escape:
+the statement binds the initial value as capital `N`, freeing `n` for the
+clauses. The invariant: `s` already holds the summed-off tail
+`(n+1) + ⋯ + N`, plus the range `0 ≤ n ≤ N`; `n` (as a `Nat`) is the measure.
 
-The escape is almost embarrassing: pick a different name in the *theorem*.
-The statement binds the initial value as capital `N`; inside the clauses,
-plain `n` is the current value and `N` the frozen initial one. Now the
-invariant can say what's true mid-flight: the books — `s` already holds the
-summed-off tail `(n+1) + ⋯ + N`, multiplication-free — plus the range, with
-`n` itself (as a `Nat`) for the measure.
-
-At the exit the test and the range floor pin the countdown at zero:
+At the exit, the test and range floor pin the countdown at zero:
 `obtain rfl : n' = 0 := by omega`, and the books collapse to the goal.
 "
 

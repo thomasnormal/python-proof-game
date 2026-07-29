@@ -11,26 +11,11 @@ Introduction "
 The final boss — the **toughest fight in the game**. (One veteran's tip
 before you charge: the residuals here wear the `PyInt` brand — same as the
 Straight-Line boss — so when a goal resists, prefer `grind` over `omega`.)
-Three shapes at once:
-
-```python
-def first_factor(n: int) -> int:
-    i = 2
-    while i * i <= n:
-        m = n
-        while 0 < m:
-            if m < i:
-                break
-            m = m - i
-        if m == 0:
-            return i
-        i = i + 1
-    return n
-```
-
-A `while` **inside** a `while`; a **`break`** inside an `if`; a
-**`return`** from mid-loop. Trial division where even the divisibility test
-is a loop — `m == 0` after repeated subtraction means `i` divides `n`.
+`nested_flow.first_factor` is three shapes at once: a `while` **inside** a
+`while`, a **`break`** inside an `if`, and a **`return`** from mid-loop —
+read its source in your inventory if you need a refresher. Trial division,
+where even the divisibility test is a loop: `m == 0` after repeated
+subtraction means `i` divides `n`.
 
 Your claim: **if `n ≥ 2` is even, `first_factor(n)` returns `2`.** (The
 unconditional smallest-prime-factor theorem is this same skeleton with

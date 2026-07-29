@@ -28,9 +28,10 @@ One lone `if`. You know whose territory that is.
 /-- For all integers `a` and `b`, running `my_max` terminates and returns
 `max a b`. -/
 Statement (a b : PyInt) : my_max(a, b) ==> max a b := by
-  Hint "Same recipe as `my_abs`: a single surviving `if` splits, and the
-  finisher knows `max` as natively as it knew `|·|`."
-  Hint (hidden := true) "`py_prove [my_max]`."
+  Hint "Same move as last level, different fork — you know what to do."
+  Hint (hidden := true) "`py_prove [my_max]` — same recipe as `my_abs`: it
+  splits the surviving `if` and closes both sides, `max` known to `omega`
+  as natively as `|·|` was."
   py_prove [my_max]
 
 Conclusion "

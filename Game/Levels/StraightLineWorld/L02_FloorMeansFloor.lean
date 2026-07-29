@@ -8,33 +8,28 @@ Level 2
 Title "Floor means floor"
 
 Introduction "
-`midpoint_spec` pins `//` to the name `Int.fdiv` — and a name, by itself,
-proves nothing. Step 2 of the arc: prove the *property* that earns the word
-**floor**. For a positive divisor `b`, the quotient `q` that `a // b`
-returns satisfies
+`midpoint_spec` pins `//` to `Int.fdiv` — a name alone proves nothing. Step 2:
+prove the *property* that earns the word **floor**. For positive divisor `b`,
+the quotient `q` that `a // b` returns satisfies
 
 ```
 b * q  ≤  a  <  b * (q + 1)
 ```
 
-— the *largest* `q` whose multiple of `b` still fits under `a`. Nothing
-there mentions `Int.fdiv`, the interpreter, or Lean: bare arithmetic any
-skeptic can audit.
+— the *largest* `q` whose multiple of `b` still fits under `a`. No `Int.fdiv`,
+no interpreter, no Lean: arithmetic any skeptic can audit.
 
-Two new pieces of kit sit in the hypotheses — each has an inventory tile
-worth reading: `hq : arith.floordiv(a, b) ⇓ q` is the **result-binding
-arrow** (the same judgment as `==>`, placed in hypothesis position to *bind*
-the returned value as `q`), and `CallsTo.typed_int_eq` is **determinism**
-(one call cannot return two different integers).
+Two new hypotheses, each with an inventory tile: `hq : arith.floordiv(a, b) ⇓
+q` is the **result-binding arrow** (`==>`, in hypothesis position, *binding*
+the return as `q`); `CallsTo.typed_int_eq` is **determinism** (one call, one
+answer).
 
-The battle plan: **name the value** (prove the run fact
-`… ==> Int.fdiv a b`, handing `py_prove` the divisor guard `b ≠ 0`), **pin
-`q`** (determinism welds `hq` to the run fact), **open the box** (stage the
-three division-algorithm facts with **`have`**, then **`grind`** — not
-`omega`: `b * q` is nonlinear and the binders wear the `PyInt` brand.
-That goes for the little helper fact too: prove `b ≠ 0` with `by grind`,
-not `by omega`). The
-hints stage every move.
+The plan: **name the value** (`… ==> Int.fdiv a b` by `py_prove`, handing it
+the divisor guard `b ≠ 0`), **pin `q`** (determinism welds `hq` to the run
+fact), **open the box** (stage the three division-algorithm facts with
+**`have`**, then **`grind`** — not `omega`: `b * q` is nonlinear and the
+binders wear the `PyInt` brand. That goes for the little helper fact too:
+prove `b ≠ 0` with `by grind`, not `by omega`). The hints stage every move.
 "
 
 /-- The floor characterization: whenever `arith.floordiv(a, b)` returns `q`

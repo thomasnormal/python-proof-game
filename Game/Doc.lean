@@ -137,7 +137,19 @@ happily treats it as an atom and reasons around it.
 You can also hand it ammunition in brackets:
 `grind [Int.gcd_zero_right, Int.natAbs_of_nonneg]` adds the named theorems
 to its matching pool for this one call — the house way to say *finish,
-using these facts*. -/
+using these facts*.
+
+**When `grind` fails and dumps a long diagnostic**, it is not noise to
+scroll past: (1) read the `[cutsat]` `Assignment` block first — it's a
+countermodel, concrete values satisfying every hypothesis it understood but
+not your goal, i.e. *why* the claim doesn't follow; (2) on `PyInt`-branded
+goals still reach for `grind` over `omega` — the brand blinds `omega`
+outright, `grind` unfolds through it; (3) in a hand-assembled `py_simp`
+proof, check `callFunction` is in the bracket — a call left unopened reads
+to `grind` as an opaque atom, not a program; (4) if the countermodel
+contradicts a hypothesis sitting right in your context, the brand is hiding
+that hypothesis from the sub-step that failed — see the `omega` tile's
+counterexample trap for the mirror case. -/
 TacticDoc grind
 
 /-- `omega` decides linear integer arithmetic goals: anything built from
@@ -362,7 +374,11 @@ def mod(a, b):
     return a % b
 ```
 
-Call functions of a module with dotted names: `arith.floordiv(-3, 0)`. -/
+Call functions of a module with dotted names: `arith.floordiv(-3, 0)`.
+Both crash the same way at a zero divisor — `arith.mod(7, 0)` raises
+`ZeroDivisionError`, exactly as `arith.floordiv(-3, 0)` does. Not asserted:
+`Game/Programs.lean`'s non-vacuity `#py_check` line proves it at build
+time. -/
 DefinitionDoc arith as "arith" in "Python programs"
 
 /-- The loaded program `ag_clamp01` — the boss of Straight-Line World:

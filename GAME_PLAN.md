@@ -464,6 +464,17 @@ Things worth knowing when extending the game:
     `fail_if_success`-guards both wrong-witness paths (W1L3 `⟨4, ?_⟩`,
     W1L5 `⟨11, …⟩`), and W1L3 carries a `Branch` that anticipates the
     natural off-by-one with a curated hint.
+25. **The `have`-without-ascription `ToVal` trap is confirmed off-path,
+    low-risk** (playtest round 3, bug-hunter). The same stuck-metavariable
+    failure mode as friction #23 (`ToVal.toVal` cannot resolve without a
+    binder type) could in principle bite a bare `have h := …` over a
+    surface call in a Machine World `∃` goal — but `have` is not unlocked
+    until `NewTactic «have»` at Straight-Line World L2
+    (`L02_FloorMeansFloor.lean`); it is unavailable to the runtime checker
+    anywhere in Machine World. Probed directly: the only way to even attempt
+    it there is **post-unlock backtracking** — finish past SLW L2, then
+    replay an earlier Machine World level — which is off the mainline path.
+    No fix applied; noted so a future pass doesn't rediscover it as new.
 
 ## One-tactic levels audit
 
